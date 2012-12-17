@@ -84,27 +84,27 @@ DISABLE_DEXPREOPT := false
 PRODUCT_TAGS += dalvik.gc.type-precise
 
 PRODUCT_COPY_FILES := \
-        device/zte/blade/init.blade.rc:root/init.blade.rc \
-        device/zte/blade/init.blade.usb.rc:root/init.blade.usb.rc \
-        device/zte/blade/ueventd.blade.rc:root/ueventd.blade.rc \
-        device/zte/blade/vold.fstab:system/etc/vold.fstab \
-        device/zte/blade/prebuilt/blade_keypad.kl:/system/usr/keylayout/blade_keypad.kl \
-        device/zte/blade/AudioFilter.csv:system/etc/AudioFilter.csv \
-        device/zte/blade/AutoVolumeControl.txt:system/etc/AutoVolumeControl.txt \
-        device/zte/blade/media_profiles.xml:system/etc/media_profiles.xml \
-        device/zte/blade/prebuilt/start_usb0.sh:system/etc/start_usb0.sh \
-        device/zte/blade/gps.conf:system/etc/gps.conf \
+        device/zte/blade/prebuilt/root/init.blade.rc:root/init.blade.rc \
+        device/zte/blade/prebuilt/root/init.blade.usb.rc:root/init.blade.usb.rc \
+        device/zte/blade/prebuilt/root/ueventd.blade.rc:root/ueventd.blade.rc \
+        device/zte/blade/prebuilt/system/etc/AudioFilter.csv:system/etc/AudioFilter.csv \
+        device/zte/blade/prebuilt/system/etc/AutoVolumeControl.txt:system/etc/AutoVolumeControl.txt \
+        device/zte/blade/prebuilt/system/etc/gps.conf:system/etc/gps.conf \
+        device/zte/blade/prebuilt/system/etc/media_profiles.xml:system/etc/media_profiles.xml \
+        device/zte/blade/prebuilt/system/etc/start_usb0.sh:system/etc/start_usb0.sh \
+        device/zte/blade/prebuilt/system/etc/vold.fstab:system/etc/vold.fstab \
+        device/zte/blade/prebuilt/system/usr/keylayout/blade_keypad.kl:/system/usr/keylayout/blade_keypad.kl \
         device/zte/blade/releasetools/extras.sh:system/bin/extras.sh
 
 # Bluetooth configuration files
 PRODUCT_COPY_FILES += \
-        device/zte/blade/init.bt.sh:system/etc/init.bt.sh \
+        device/zte/blade/prebuilt/system/etc/init.bt.sh:system/etc/init.bt.sh \
         system/bluetooth/data/main.le.conf:system/etc/bluetooth/main.conf
 
 # WiFi
 PRODUCT_COPY_FILES += \
-        device/zte/blade/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
-        device/zte/blade/prebuilt/ar6000.ko:system/wifi/ar6000.ko \
+        device/zte/blade/prebuilt/system/etc/wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
+        device/zte/blade/prebuilt/system/wifi/ar6000.ko:system/wifi/ar6000.ko \
         device/zte/blade/firmware/regcode:system/wifi/regcode \
         device/zte/blade/firmware/data.patch.hw2_0.bin:system/wifi/data.patch.hw2_0.bin \
         device/zte/blade/firmware/athwlan.bin.z77:system/wifi/athwlan.bin.z77 \
