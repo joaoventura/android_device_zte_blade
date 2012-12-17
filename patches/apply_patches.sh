@@ -32,7 +32,7 @@ git am 0001-Add-support-for-QCOM_LEGACY_OMX.patch
 git am 0001-Fix-video-thumbnail-generation.patch
 
 # Remove Trebuchet wallpapers
-cd ~/android/cm9/package/apps/Trebuchet
+cd ~/android/cm9/packages/apps/Trebuchet
 git am 0001-Trebuchet-Remove-wallpapers.patch
 
 
