@@ -1,0 +1,27 @@
+From 456cc43725a9565a5ecf1e71ece8f3e4310d23a8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Mon, 17 Dec 2012 20:17:04 +0000
+Subject: [PATCH] Add EcoWallpapers to build
+
+Change-Id: I07743bc48bcf96d770f6a542b60559d1c4c06b66
+---
+ config/common.mk |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/config/common.mk b/config/common.mk
+index 5a2adba..6b1f205 100644
+--- a/config/common.mk
++++ b/config/common.mk
+@@ -105,7 +105,8 @@ PRODUCT_PACKAGES += \
+     libcyanogen-dsp \
+     audio_effects.conf \
+ #    CMWallpapers \
+-    Apollo
++    Apollo \
++    EcoWallpapers
+ #    CMUpdater
+ 
+ # Extra tools in CM
+-- 
+1.7.9.5
+

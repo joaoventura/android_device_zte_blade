@@ -20,6 +20,7 @@ git am 0001-Mms-auto-retrieval-ics-2-2-mms.patch
 cd ~/android/cm9/vendor/cm
 git am 0001-Add-blade-to-lunch-menu.patch
 git am 0001-Remove-cm-bloat.patch
+git am 0001-Add-EcoWallpapers-to-build.patch
 
 # Build
 cd ~/android/cm9/build
@@ -29,6 +30,10 @@ git am 0001-Remove-tts-and-videoeditor.patch
 cd ~/android/cm9/frameworks/base
 git am 0001-Add-support-for-QCOM_LEGACY_OMX.patch
 git am 0001-Fix-video-thumbnail-generation.patch
+
+# Remove Trebuchet wallpapers
+cd ~/android/cm9/package/apps/Trebuchet
+git am 0001-Trebuchet-Remove-wallpapers.patch
 
 
 cd ~/android/cm9/
