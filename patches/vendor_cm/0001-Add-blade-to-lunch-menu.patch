@@ -1,0 +1,23 @@
+From d99b59a68f9e29262868c08e7d63186d56011175 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Sun, 16 Dec 2012 13:16:22 +0000
+Subject: [PATCH] Add blade to lunch menu
+
+Change-Id: I653fc26584f6fd0303166f70833c203ef683d138
+---
+ jenkins-build-targets |    1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/jenkins-build-targets b/jenkins-build-targets
+index cf9dfe1..386c030 100644
+--- a/jenkins-build-targets
++++ b/jenkins-build-targets
+@@ -1,4 +1,5 @@
+ cm_aoba-userdebug
++cm_blade-userdebug
+ cm_c800-userdebug
+ cm_doubleshot-userdebug
+ cm_e400-userdebug
+-- 
+1.7.9.5
+

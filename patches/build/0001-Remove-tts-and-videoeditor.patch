@@ -1,0 +1,45 @@
+From 629b92ca32ba09db5a571bac971ebdd1a85394c2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Mon, 12 Nov 2012 20:43:51 +0000
+Subject: [PATCH] Remove tts and videoeditor
+
+Change-Id: Icad6593e7c827664db98b5b80ec091899f12cb0b
+---
+ target/product/full_base.mk |   12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/target/product/full_base.mk b/target/product/full_base.mk
+index cc492ed..a190251 100644
+--- a/target/product/full_base.mk
++++ b/target/product/full_base.mk
+@@ -24,13 +24,13 @@ PRODUCT_PACKAGES := \
+     libdrmframework \
+     libdrmframework_jni \
+     libfwdlockengine \
+-    VideoEditor \
++#    VideoEditor \
+     WAPPushManager
+ 
+-PRODUCT_PACKAGES += \
+-    libvideoeditor_jni \
+-    libvideoeditorplayer \
+-    libvideoeditor_core
++#PRODUCT_PACKAGES += \
++#    libvideoeditor_jni \
++#    libvideoeditorplayer \
++#    libvideoeditor_core
+ 
+ # Additional settings used in all AOSP builds
+ PRODUCT_PROPERTY_OVERRIDES := \
+@@ -43,7 +43,7 @@ PRODUCT_LOCALES := en_US
+ $(call inherit-product-if-exists, frameworks/base/data/sounds/AllAudio.mk)
+ 
+ # Get the TTS language packs
+-$(call inherit-product-if-exists, external/svox/pico/lang/all_pico_languages.mk)
++#$(call inherit-product-if-exists, external/svox/pico/lang/all_pico_languages.mk)
+ 
+ # Get a list of languages.
+ $(call inherit-product, $(SRC_TARGET_DIR)/product/locales_full.mk)
+-- 
+1.7.9.5
+

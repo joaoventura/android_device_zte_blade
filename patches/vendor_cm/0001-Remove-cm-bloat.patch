@@ -1,0 +1,82 @@
+From e156d77418a415f200d19061f23d89074ae55d01 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Mon, 12 Nov 2012 20:33:31 +0000
+Subject: [PATCH] Remove cm bloat
+
+Change-Id: I1a628a71558f7188a6168ffda289c85ddda35a41
+---
+ config/common.mk |   38 +++++++++++++++++++-------------------
+ 1 file changed, 19 insertions(+), 19 deletions(-)
+
+diff --git a/config/common.mk b/config/common.mk
+index 23e9a78..5a2adba 100644
+--- a/config/common.mk
++++ b/config/common.mk
+@@ -56,9 +56,9 @@ PRODUCT_COPY_FILES +=  \
+ 	vendor/cm/prebuilt/common/apps/Superuser.apk:system/app/Superuser.apk
+ 
+ # Bring in camera effects
+-PRODUCT_COPY_FILES +=  \
+-    vendor/cm/prebuilt/common/media/LMprec_508.emd:system/media/LMprec_508.emd \
+-    vendor/cm/prebuilt/common/media/PFFprec_600.emd:system/media/PFFprec_600.emd
++#PRODUCT_COPY_FILES +=  \
++#    vendor/cm/prebuilt/common/media/LMprec_508.emd:system/media/LMprec_508.emd \
++#    vendor/cm/prebuilt/common/media/PFFprec_600.emd:system/media/PFFprec_600.emd
+ 
+ # Enable SIP+VoIP on all targets
+ PRODUCT_COPY_FILES += \
+@@ -78,25 +78,25 @@ include vendor/cm/config/themes_common.mk
+ # Required CM packages
+ PRODUCT_PACKAGES += \
+     Camera \
+-    Development \
++#    Development \
+     LatinIME \
+-    SpareParts \
++#    SpareParts \
+     su
+ 
+ # Optional CM packages
+ PRODUCT_PACKAGES += \
+-    VideoEditor \
+-    VoiceDialer \
++#    VideoEditor \
++#    VoiceDialer \
+     SoundRecorder \
+-    Basic \
+-    HoloSpiralWallpaper \
+-    MagicSmokeWallpapers \
+-    NoiseField \
+-    Galaxy4 \
+-    LiveWallpapers \
+-    LiveWallpapersPicker \
+-    VisualizationWallpapers \
+-    PhaseBeam
++#    Basic \
++#    HoloSpiralWallpaper \
++#    MagicSmokeWallpapers \
++#    NoiseField \
++#    Galaxy4 \
++#    LiveWallpapers \
++#    LiveWallpapersPicker \
++    VisualizationWallpapers
++#    PhaseBeam
+ 
+ # Custom CM packages
+ PRODUCT_PACKAGES += \
+@@ -104,9 +104,9 @@ PRODUCT_PACKAGES += \
+     DSPManager \
+     libcyanogen-dsp \
+     audio_effects.conf \
+-    CMWallpapers \
+-    Apollo \
+-    CMUpdater
++#    CMWallpapers \
++    Apollo
++#    CMUpdater
+ 
+ # Extra tools in CM
+ PRODUCT_PACKAGES += \
+-- 
+1.7.9.5
+

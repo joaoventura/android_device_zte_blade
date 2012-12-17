@@ -1,0 +1,126 @@
+From a3041335b866716c61c4670a07d0d0e09294dd65 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Mon, 12 Nov 2012 20:14:58 +0000
+Subject: [PATCH] Mms auto-retrieval (ics) 1/2: framework
+
+Change-Id: Ifec084b26e4eddf4da85d8beb861c7029674e6ef
+---
+ core/java/android/provider/Settings.java           |   22 ++++++++++-
+ .../telephony/gsm/GsmDataConnectionTracker.java    |   40 ++++++++++++++++++--
+ 2 files changed, 58 insertions(+), 4 deletions(-)
+
+diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
+index 4c4a6d5..1aee0c3 100644
+--- a/core/java/android/provider/Settings.java
++++ b/core/java/android/provider/Settings.java
+@@ -1294,6 +1294,24 @@ public final class Settings {
+          */
+         public static final String WIFI_STATIC_DNS2 = "wifi_static_dns2";
+ 
++        /**
++         * Allows automatic retrieval of mms contents
++         * <p>Type: INT</p>
++         * 0 -- false
++         * 1 -- true
++         * @hide
++         */
++        public static final String MMS_AUTO_RETRIEVAL = "mms_auto_retrieval";
++
++        /**
++         * Allows automatic retrieval of mms contents during roaming
++         * <p>Type: INT</p>
++         * 0 -- false
++         * 1 -- true
++         * @hide
++         */
++        public static final String MMS_AUTO_RETRIEVAL_ON_ROAMING = "mms_auto_on_roaming";
++
+ 
+         /**
+          * Determines whether remote devices may discover and/or connect to
+@@ -2417,7 +2435,7 @@ public final class Settings {
+ 
+         /**
+          * Boolean value whether to link ringtone and notification volumes
+-         * 
++         *
+          * @hide
+          */
+         public static final String VOLUME_LINK_NOTIFICATION = "volume_link_notification";
+@@ -2602,6 +2620,8 @@ public final class Settings {
+             WIFI_STATIC_NETMASK,
+             WIFI_STATIC_DNS1,
+             WIFI_STATIC_DNS2,
++            MMS_AUTO_RETRIEVAL,
++            MMS_AUTO_RETRIEVAL_ON_ROAMING,
+             BLUETOOTH_DISCOVERABILITY,
+             BLUETOOTH_DISCOVERABILITY_TIMEOUT,
+             DIM_SCREEN,
+diff --git a/telephony/java/com/android/internal/telephony/gsm/GsmDataConnectionTracker.java b/telephony/java/com/android/internal/telephony/gsm/GsmDataConnectionTracker.java
+index d715dac..a41a5b2 100644
+--- a/telephony/java/com/android/internal/telephony/gsm/GsmDataConnectionTracker.java
++++ b/telephony/java/com/android/internal/telephony/gsm/GsmDataConnectionTracker.java
+@@ -741,8 +741,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
+ 
+         boolean desiredPowerState = mPhone.getServiceStateTracker().getDesiredPowerState();
+ 
+-        if ((apnContext.getState() == State.IDLE || apnContext.getState() == State.SCANNING) &&
+-                isDataAllowed(apnContext) && getAnyDataEnabled() && !isEmergency()) {
++        if (canSetupData(apnContext)) {
+ 
+             if (apnContext.getState() == State.IDLE) {
+                 ArrayList<ApnSetting> waitingApns = buildWaitingApns(apnContext.getApnType());
+@@ -777,6 +776,41 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
+         }
+     }
+ 
++    /**
++     * Report on whether data connectivity can be setup for any APN.
++     * @param apnContext The apnContext
++     * @return boolean
++     */
++    private boolean canSetupData(ApnContext apnContext) {
++        if (apnContext.getState() != State.IDLE && apnContext.getState() != State.SCANNING) {
++            return false;
++        }
++
++        if (isDataAllowed(apnContext) && getAnyDataEnabled() && !isEmergency()) {
++            return true;
++        }
++
++        // Get the MMS retrieval settings. Defaults to enabled with roaming disabled
++        final ContentResolver resolver = mPhone.getContext().getContentResolver();
++        boolean mmsAutoRetrieval = Settings.System.getInt(resolver,
++                Settings.System.MMS_AUTO_RETRIEVAL, 1) == 1;
++        boolean mmsRetrievalRoaming = Settings.System.getInt(resolver,
++                Settings.System.MMS_AUTO_RETRIEVAL_ON_ROAMING, 0) == 1;
++
++        // Allow automatic Mms connections if user has enabled it
++        if (mmsAutoRetrieval && apnContext.getApnType().equals(Phone.APN_TYPE_MMS)) {
++            // don't allow MMS connections while roaming if disabled
++            TelephonyManager tm = (TelephonyManager)
++                    mPhone.getContext().getSystemService(Context.TELEPHONY_SERVICE);
++            if (tm.isNetworkRoaming() && !mmsRetrievalRoaming) {
++                return false;
++            }
++            return true;
++        }
++
++        return false;
++    }
++
+     @Override
+     // Disabled apn's still need avail/unavail notificiations - send them out
+     protected void notifyOffApnsOfAvailability(String reason) {
+@@ -2410,7 +2444,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
+                         + mPreferredApn.numeric + ":" + mPreferredApn);
+                 }
+                 if ((mPreferredApn.numeric.equals(operator) && mPreferredApn.canHandleType(requestedApnType)) &&
+-                    (mPreferredApn.bearer == 0 || mPreferredApn.bearer == radioTech) && 
++                    (mPreferredApn.bearer == 0 || mPreferredApn.bearer == radioTech) &&
+                     !apnList.contains(mPreferredApn))
+                 {
+                     apnList.add(mPreferredApn);
+-- 
+1.7.9.5
+
