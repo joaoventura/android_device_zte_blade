@@ -1,0 +1,272 @@
+From 9c42415cdfc4dec61a5d2f954e08c00d985ae443 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Mon, 17 Dec 2012 18:23:03 +0000
+Subject: [PATCH] Fix video thumbnail generation (by gntcs
+ https://github.com/GenetICS/frameworks_base/)
+
+Change-Id: I7d711065a938ed306334e62953dd61cb6dbff416
+---
+ include/media/stagefright/OMXCodec.h               |    2 +-
+ media/java/android/media/ThumbnailUtils.java       |    2 +
+ media/libstagefright/OMXCodec.cpp                  |   14 +++-
+ .../StagefrightMetadataRetriever.cpp               |   80 ++++++++++++++++++--
+ 4 files changed, 87 insertions(+), 11 deletions(-)
+
+diff --git a/include/media/stagefright/OMXCodec.h b/include/media/stagefright/OMXCodec.h
+index e338ba4..e3fe9cc 100755
+--- a/include/media/stagefright/OMXCodec.h
++++ b/include/media/stagefright/OMXCodec.h
+@@ -380,7 +380,7 @@ private:
+             const void *data, size_t size,
+             unsigned *profile, unsigned *level, const sp<MetaData> &meta);
+ #ifdef QCOM_HARDWARE
+-    void parseFlags( uint32_t flags );
++    void parseFlags();
+ #endif
+ 
+     OMXCodec(const OMXCodec &);
+diff --git a/media/java/android/media/ThumbnailUtils.java b/media/java/android/media/ThumbnailUtils.java
+index 078d4af..14a5345 100644
+--- a/media/java/android/media/ThumbnailUtils.java
++++ b/media/java/android/media/ThumbnailUtils.java
+@@ -150,6 +150,8 @@ public class ThumbnailUtils {
+         try {
+             retriever.setDataSource(filePath);
+             bitmap = retriever.getFrameAtTime(-1);
++        } catch (OutOfMemoryError e) {
++                Log.e(TAG, "Got OOM error", e);
+         } catch (IllegalArgumentException ex) {
+             // Assume this is a corrupt video file
+         } catch (RuntimeException ex) {
+diff --git a/media/libstagefright/OMXCodec.cpp b/media/libstagefright/OMXCodec.cpp
+index ea4f79d..26447ad 100644
+--- a/media/libstagefright/OMXCodec.cpp
++++ b/media/libstagefright/OMXCodec.cpp
+@@ -2048,6 +2048,9 @@ OMXCodec::OMXCodec(
+       mState(LOADED),
+       mInitialBufferSubmit(true),
+       mSignalledEOS(false),
++#ifdef QCOM_HARDWARE
++      mFinalStatus(OK),
++#endif
+       mNoMoreOutputData(false),
+       mOutputPortSettingsHaveChanged(false),
+       mSeekTimeUs(-1),
+@@ -2072,6 +2075,9 @@ OMXCodec::OMXCodec(
+ #endif
+       )
+                         ? NULL : nativeWindow) {
++#ifdef QCOM_HARDWARE
++    parseFlags();
++#endif
+     mPortStatus[kPortIndexInput] = ENABLED;
+     mPortStatus[kPortIndexOutput] = ENABLED;
+ 
+@@ -4198,10 +4204,12 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
+         // mNoMoreOutputData to false so fillOutputBuffer gets called on
+         // the first output buffer (see comment in fillOutputBuffer), and
+         // mSignalledEOS must be true so drainInputBuffer is not executed
+-        // on extra frames.
++        // on extra frames. Setting mFinalStatus to ERROR_END_OF_STREAM as
++        // we dont want to return OK and NULL buffer in read.
+         flags |= OMX_BUFFERFLAG_EOS;
+         mNoMoreOutputData = false;
+         mSignalledEOS = true;
++        mFinalStatus = ERROR_END_OF_STREAM;
+ #endif
+     } else {
+         mNoMoreOutputData = false;
+@@ -5917,10 +5925,10 @@ status_t OMXCodec::pause() {
+ 
+ }
+ #ifdef QCOM_HARDWARE
+-void OMXCodec::parseFlags(uint32_t flags) {
++void OMXCodec::parseFlags() {
+     //TODO - uncomment if needed
+     //    mGPUComposition = ((flags & kEnableGPUComposition) ? true : false);
+-    mThumbnailMode = ((flags & kEnableThumbnailMode) ? true : false);
++    mThumbnailMode = ((mFlags & kEnableThumbnailMode) ? true : false);
+ }
+ #endif
+ 
+diff --git a/media/libstagefright/StagefrightMetadataRetriever.cpp b/media/libstagefright/StagefrightMetadataRetriever.cpp
+index 9b09bd1..57b0d73 100755
+--- a/media/libstagefright/StagefrightMetadataRetriever.cpp
++++ b/media/libstagefright/StagefrightMetadataRetriever.cpp
+@@ -1,6 +1,6 @@
+ /*
+  * Copyright (C) 2009 The Android Open Source Project
+- * Copyright (C) 2011 Code Aurora Forum
++ * Copyright (C) 2011, Code Aurora Forum. All rights reserved.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+@@ -30,19 +30,31 @@
+ #include <media/stagefright/OMXCodec.h>
+ #include <media/stagefright/MediaDefs.h>
+ 
++#ifdef QCOM_HARDWARE
++#include <cutils/properties.h>
++#endif
++
+ namespace android {
+ 
+ StagefrightMetadataRetriever::StagefrightMetadataRetriever()
+     : mParsedMetaData(false),
+       mAlbumArt(NULL) {
++#ifdef QCOM_HARDWARE
++    LOGV("StagefrightMetadataRetriever() constructor %p ", this);
++#else
+     LOGV("StagefrightMetadataRetriever()");
++#endif
+ 
+     DataSource::RegisterDefaultSniffers();
+     CHECK_EQ(mClient.connect(), OK);
+ }
+ 
+ StagefrightMetadataRetriever::~StagefrightMetadataRetriever() {
++#ifdef QCOM_HARDWARE
++    LOGV("~StagefrightMetadataRetriever() %p", this);
++#else
+     LOGV("~StagefrightMetadataRetriever()");
++#endif
+ 
+     delete mAlbumArt;
+     mAlbumArt = NULL;
+@@ -52,7 +64,12 @@ StagefrightMetadataRetriever::~StagefrightMetadataRetriever() {
+ 
+ status_t StagefrightMetadataRetriever::setDataSource(
+         const char *uri, const KeyedVector<String8, String8> *headers) {
++
++#ifdef QCOM_HARDWARE
++    LOGW("setDataSource(%s) %p", uri, this);
++#else
+     LOGV("setDataSource(%s)", uri);
++#endif
+ 
+     mParsedMetaData = false;
+     mMetaData.clear();
+@@ -81,7 +98,11 @@ status_t StagefrightMetadataRetriever::setDataSource(
+         int fd, int64_t offset, int64_t length) {
+     fd = dup(fd);
+ 
++#ifdef QCOM_HARDWARE
++    LOGW("setDataSource(%d, %lld, %lld) %p", fd, offset, length, this);
++#else
+     LOGV("setDataSource(%d, %lld, %lld)", fd, offset, length);
++#endif
+ 
+     mParsedMetaData = false;
+     mMetaData.clear();
+@@ -208,7 +229,11 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
+ 
+     sp<MetaData> meta = decoder->getFormat();
+ 
++#ifdef QCOM_HARDWARE
++    int32_t width, height, frame_width_rounded;
++#else
+     int32_t width, height;
++#endif
+     CHECK(meta->findInt32(kKeyWidth, &width));
+     CHECK(meta->findInt32(kKeyHeight, &height));
+ 
+@@ -231,7 +256,12 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
+     frame->mHeight = crop_bottom - crop_top + 1;
+     frame->mDisplayWidth = frame->mWidth;
+     frame->mDisplayHeight = frame->mHeight;
++#ifdef QCOM_HARDWARE
++    frame_width_rounded = ((frame->mWidth + 3)/4)*4;
++    frame->mSize = frame_width_rounded * frame->mHeight * 2;
++#else
+     frame->mSize = frame->mWidth * frame->mHeight * 2;
++#endif
+     frame->mData = new uint8_t[frame->mSize];
+     frame->mRotationAngle = rotationAngle;
+ 
+@@ -261,7 +291,11 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
+             width, height,
+             crop_left, crop_top, crop_right, crop_bottom,
+             frame->mData,
++#ifdef QCOM_HARDWARE
++            frame_width_rounded,
++#else
+             frame->mWidth,
++#endif
+             frame->mHeight,
+             0, 0, frame->mWidth - 1, frame->mHeight - 1);
+ #ifdef QCOM_HARDWARE
+@@ -289,7 +323,11 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
+ VideoFrame *StagefrightMetadataRetriever::getFrameAtTime(
+         int64_t timeUs, int option) {
+ 
++#ifdef QCOM_HARDWARE
++    LOGW("getFrameAtTime: %lld us option: %d %p", timeUs, option, this);
++#else
+     LOGV("getFrameAtTime: %lld us option: %d", timeUs, option);
++#endif
+ 
+     if (mExtractor.get() == NULL) {
+         LOGV("no extractor.");
+@@ -362,25 +400,53 @@ VideoFrame *StagefrightMetadataRetriever::getFrameAtTime(
+         LOGV("Software codec is not being used for %s clips for thumbnail ",
+             mime);
+     } else {
+-        frame = extractVideoFrameWithCodecFlags(
++        char value[PROPERTY_VALUE_MAX];
++        if (property_get("debug.thumbnail.disablesw", value, NULL) &&
++            atoi(value)) {
++            LOGE("Dont use sw decoder for thumbnail");
++        }
++        else {
++            frame = extractVideoFrameWithCodecFlags(
++                &mClient, trackMeta, source, OMXCodec::kSoftwareCodecsOnly,
++                timeUs, option);
++            if (frame == NULL){
++                // remake source to ensure its stopped before we start it
++                source.clear();
++                source = mExtractor->getTrack(i);
++                if (source.get() == NULL) {
++                    LOGV("unable to instantiate video track.");
++                    return NULL;
++                }
++            }
++        }
++    }
+ #else
+     VideoFrame *frame =
+         extractVideoFrameWithCodecFlags(
+-#endif
+                 &mClient, trackMeta, source, OMXCodec::kPreferSoftwareCodecs,
+                 timeUs, option);
+-#ifdef QCOM_HARDWARE
+-    }
+ #endif
+ 
+-#if defined(TARGET8x60) || !defined(QCOM_HARDWARE)
+     if (frame == NULL) {
+         LOGV("Software decoder failed to extract thumbnail, "
+              "trying hardware decoder.");
++#if defined(QCOM_LEGACY_OMX) || !defined(QCOM_HARDWARE)
+             frame = extractVideoFrameWithCodecFlags(&mClient, trackMeta, source, 0,
+                         timeUs, option);
+-    }
++#else
++        char value[PROPERTY_VALUE_MAX];
++        int32_t flags = 0;
++        if (property_get("ro.board.platform", value, "0")
++            && (!strncmp(value, "msm8660", sizeof("msm8660") - 1) ||
++                !strncmp(value, "msm8960", sizeof("msm8960") - 1) ||
++                !strncmp(value, "msm7x30", sizeof("msm7x30") - 1) )) {
++            flags |= OMXCodec::kEnableThumbnailMode | OMXCodec::kHardwareCodecsOnly;
++            frame = extractVideoFrameWithCodecFlags(&mClient, trackMeta,
++                        source, flags,
++                        timeUs, option);
++        }
+ #endif
++    }
+     return frame;
+ }
+ 
+-- 
+1.7.9.5
+

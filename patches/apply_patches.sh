@@ -25,8 +25,10 @@ git am 0001-Remove-cm-bloat.patch
 cd ~/android/cm9/build
 git am 0001-Remove-tts-and-videoeditor.patch
 
-# QCOM_LEGACY_OMX
+# QCOM_LEGACY_OMX and Fix video Thumbnails
 cd ~/android/cm9/frameworks/base
 git am 0001-Add-support-for-QCOM_LEGACY_OMX.patch
+git am 0001-Fix-video-thumbnail-generation.patch
+
 
 cd ~/android/cm9/
