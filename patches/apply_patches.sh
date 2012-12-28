@@ -1,39 +1,45 @@
-# LatinIME: Option to reverse volume key logic on cursor control
-#cd ~/android/cm9/packages/inputmethods/LatinIME
-#git reset --hard
-# Get patch and apply it
-#git fetch http://review.cyanogenmod.com/CyanogenMod/android_packages_inputmethods_LatinIME refs/changes/26/16826/4 && git format-patch -1 --stdout FETCH_HEAD > ~/patch.patch
-#git apply ~/patch.patch
-#rm ~/patch.patch
+#!/bin/bash
+
+# Set here the base location of your cyanogenmod files
+BASE_PATH=~/android/cm9
+PATCHES_PATH=$BASE_PATH/device/zte/blade/patches
+
+# Copies the patch to a location and applies 'git am'
+function applyPatch {
+    # Paths
+    local SRC_FILE=$PATCHES_PATH/$2/$1
+    local DST_PATH=$BASE_PATH/$3
+    local DST_FILE=$DST_PATH/$1
+    # Copy src_file to dst_path
+    cp $SRC_FILE $DST_PATH
+    # Apply the patch
+    cd $DST_PATH
+    git am $DST_FILE
+    # Remove the patch file
+    rm $DST_FILE
+    # Return to patches location
+    cd $PATCHES_PATH
+}
 
 # Email: Add option to allow the download/upload of "potentially" insecure attachment
-cd ~/android/cm9/packages/apps/Email
-git am 0001-Email-insecure-attachments.patch
+applyPatch 0001-Email-insecure-attachments.patch packages_apps_Email packages/apps/Email
 
 # Mms auto-retrieval
-cd ~/android/cm9/frameworks/base
-git am 0001-Mms-auto-retrieval-ics-1-2-framework.patch
-cd ~/android/cm9/packages/apps/Mms
-git am 0001-Mms-auto-retrieval-ics-2-2-mms.patch
+applyPatch 0001-Mms-auto-retrieval-ics-1-2-framework.patch frameworks_base frameworks/base
+applyPatch 0001-Mms-auto-retrieval-ics-2-2-mms.patch packages_apps_Mms packages/apps/Mms
 
 # Vendor
-cd ~/android/cm9/vendor/cm
-git am 0001-Add-blade-to-lunch-menu.patch
-git am 0001-Remove-cm-bloat.patch
-git am 0001-Add-EcoWallpapers-to-build.patch
+applyPatch 0001-Add-blade-to-lunch-menu.patch vendor_cm vendor/cm
+applyPatch 0001-Remove-cm-bloat.patch vendor_cm vendor/cm
+applyPatch 0001-Add-EcoWallpapers-to-build.patch vendor_cm vendor/cm
 
 # Build
-cd ~/android/cm9/build
-git am 0001-Remove-tts-and-videoeditor.patch
+applyPatch 0001-Remove-tts-and-videoeditor.patch build build
 
 # QCOM_LEGACY_OMX and Fix video Thumbnails
-cd ~/android/cm9/frameworks/base
-git am 0001-Add-support-for-QCOM_LEGACY_OMX.patch
-git am 0001-Fix-video-thumbnail-generation.patch
+applyPatch 0001-Add-support-for-QCOM_LEGACY_OMX.patch frameworks_base frameworks/base
+applyPatch 0001-Fix-video-thumbnail-generation.patch frameworks_base frameworks/base
 
 # Remove Trebuchet wallpapers
-cd ~/android/cm9/packages/apps/Trebuchet
-git am 0001-Trebuchet-Remove-wallpapers.patch
+applyPatch 0001-Trebuchet-Remove-wallpapers.patch packages_apps_Trebuchet packages/apps/Trebuchet
 
-
-cd ~/android/cm9/
