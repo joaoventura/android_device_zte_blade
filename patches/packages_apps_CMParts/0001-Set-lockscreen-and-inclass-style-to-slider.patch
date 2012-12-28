@@ -1,0 +1,35 @@
+From 463393e9df1a2b5661ee59bc478524c00e50b3fa Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Sat, 10 Nov 2012 14:06:18 +0000
+Subject: [PATCH] Set lockscreen and inclass style to slider
+
+Change-Id: I37324bef5d01954c97b6b756f2b072af168d2d92
+---
+ .../activities/LockscreenStyleActivity.java        |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/com/cyanogenmod/cmparts/activities/LockscreenStyleActivity.java b/src/com/cyanogenmod/cmparts/activities/LockscreenStyleActivity.java
+index 8403f3f..df48f50 100644
+--- a/src/com/cyanogenmod/cmparts/activities/LockscreenStyleActivity.java
++++ b/src/com/cyanogenmod/cmparts/activities/LockscreenStyleActivity.java
+@@ -141,7 +141,7 @@ public class LockscreenStyleActivity extends PreferenceActivity implements
+         mLockscreenStylePref = (ListPreference) prefSet.findPreference(LOCKSCREEN_STYLE_PREF);
+         mLockscreenStyle = LockscreenStyle.getStyleById(
+                 Settings.System.getInt(getContentResolver(),
+-                Settings.System.LOCKSCREEN_STYLE_PREF, LockscreenStyle.getIdByStyle(LockscreenStyle.Ring)));
++                Settings.System.LOCKSCREEN_STYLE_PREF, LockscreenStyle.getIdByStyle(LockscreenStyle.Slider)));
+         mLockscreenStylePref.setValue(String.valueOf(LockscreenStyle.getIdByStyle(mLockscreenStyle)));
+         mLockscreenStylePref.setOnPreferenceChangeListener(this);
+ 
+@@ -149,7 +149,7 @@ public class LockscreenStyleActivity extends PreferenceActivity implements
+         mInCallStylePref = (ListPreference) prefSet.findPreference(IN_CALL_STYLE_PREF);
+         mInCallStyle = InCallStyle.getStyleById(
+                 Settings.System.getInt(getContentResolver(),
+-                Settings.System.IN_CALL_STYLE_PREF, InCallStyle.getIdByStyle(InCallStyle.Ring)));
++                Settings.System.IN_CALL_STYLE_PREF, InCallStyle.getIdByStyle(InCallStyle.Slider)));
+         mInCallStylePref.setValue(String.valueOf(InCallStyle.getIdByStyle(mInCallStyle)));
+         mInCallStylePref.setOnPreferenceChangeListener(this);
+ 
+-- 
+1.7.9.5
+

@@ -1,0 +1,85 @@
+From 2462dc0504069c7a6343cf1f1b61bf4f149f5073 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Fri, 9 Nov 2012 21:25:44 +0000
+Subject: [PATCH] Mms auto-retrieval (for gingerbread) (2/2): mms app
+
+- AndroidManifest: Added WRITE_SETTINGS permission
+- MessagingPreferenceActivity: get/set Settings.System.MMS_AUTO_RETRIEVAL and
+                               Settings.System.MMS_AUTO_RETRIVAL_ON_ROAMING
+
+Change-Id: I9188065de20100af708ed0991bdbe5f28c30a2a0
+---
+ AndroidManifest.xml                                |    1 +
+ .../mms/ui/MessagingPreferenceActivity.java        |   19 +++++++++++++++++++
+ 2 files changed, 20 insertions(+)
+
+diff --git a/AndroidManifest.xml b/AndroidManifest.xml
+index bc972fe..d712323 100644
+--- a/AndroidManifest.xml
++++ b/AndroidManifest.xml
+@@ -39,6 +39,7 @@
+     <uses-permission android:name="android.permission.WAKE_LOCK" />
+     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+     <uses-permission android:name="android.permission.INSTALL_DRM" />
++    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+     <!-- Grant permission to system apps to access receiver -->
+     <permission android:name="android.permission.MMS_PUSH"
+                 android:protectionLevel="signatureOrSystem"
+diff --git a/src/com/android/mms/ui/MessagingPreferenceActivity.java b/src/com/android/mms/ui/MessagingPreferenceActivity.java
+index 8c72e24..6c17724 100755
+--- a/src/com/android/mms/ui/MessagingPreferenceActivity.java
++++ b/src/com/android/mms/ui/MessagingPreferenceActivity.java
+@@ -23,10 +23,12 @@ import com.android.mms.R;
+ 
+ import android.app.AlertDialog;
+ import android.app.Dialog;
++import android.content.ContentResolver;
+ import android.content.DialogInterface;
+ import android.content.Intent;
+ import android.content.SharedPreferences;
+ import android.os.Bundle;
++import android.preference.CheckBoxPreference;
+ import android.preference.ListPreference;
+ import android.preference.Preference;
+ import android.preference.Preference.OnPreferenceChangeListener;
+@@ -97,6 +99,8 @@ public class MessagingPreferenceActivity extends PreferenceActivity {
+     private Preference mMmsReadReportPref;
+     private Preference mManageSimPref;
+     private Preference mClearHistoryPref;
++    private CheckBoxPreference mMmsAutoRetrieval;
++    private CheckBoxPreference mMmsRetrievalDuringRoaming;
+     private ListPreference mVibrateWhenPref;
+     private Preference mManageTemplate;
+     private Recycler mSmsRecycler;
+@@ -125,6 +129,15 @@ public class MessagingPreferenceActivity extends PreferenceActivity {
+         mManageTemplate = findPreference(MANAGE_TEMPLATES);
+         mGestureSensitivity = (ListPreference) findPreference(GESTURE_SENSITIVITY);
+ 
++        // Get the MMS retrieval settings. Defaults to enabled with roaming disabled
++        ContentResolver resolver = getContentResolver();
++        mMmsAutoRetrieval = (CheckBoxPreference) findPreference(AUTO_RETRIEVAL);
++        mMmsAutoRetrieval.setChecked(Settings.System.getInt(resolver,
++                Settings.System.MMS_AUTO_RETRIEVAL, 1) == 1);
++        mMmsRetrievalDuringRoaming = (CheckBoxPreference) findPreference(RETRIEVAL_DURING_ROAMING);
++        mMmsRetrievalDuringRoaming.setChecked(Settings.System.getInt(resolver,
++                Settings.System.MMS_AUTO_RETRIEVAL_ON_ROAMING, 0) == 1);
++
+         if (!MmsApp.getApplication().getTelephonyManager().hasIccCard()) {
+             // No SIM card, remove the SIM-related prefs
+             PreferenceCategory smsCategory =
+@@ -264,6 +277,12 @@ public class MessagingPreferenceActivity extends PreferenceActivity {
+         } else if (preference == mClearHistoryPref) {
+             showDialog(CONFIRM_CLEAR_SEARCH_HISTORY_DIALOG);
+             return true;
++        } else if (preference == mMmsAutoRetrieval) {
++            Settings.System.putInt(getContentResolver(), Settings.System.MMS_AUTO_RETRIEVAL,
++                    mMmsAutoRetrieval.isChecked() ? 1 : 0);
++        } else if (preference == mMmsRetrievalDuringRoaming) {
++            Settings.System.putInt(getContentResolver(), Settings.System.MMS_AUTO_RETRIEVAL_ON_ROAMING,
++                    mMmsRetrievalDuringRoaming.isChecked() ? 1 : 0);
+         }
+ 
+         return super.onPreferenceTreeClick(preferenceScreen, preference);
+-- 
+1.7.9.5
+

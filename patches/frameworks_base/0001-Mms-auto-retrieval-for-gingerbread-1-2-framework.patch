@@ -1,0 +1,184 @@
+From 793c986271f7aef2dc80021483a1d1aa45b45a1d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Fri, 9 Nov 2012 21:22:53 +0000
+Subject: [PATCH] Mms auto-retrieval (for gingerbread) (1/2): framework
+
+- Settings: Added MMS_AUTO_RETRIEVAL and MMS_AUTO_RETRIEVAL_ON_ROAMING settings
+- ConnectivityService: Check Settings.System to allow automatic mms retrieval
+
+Change-Id: Id1e1e7cecba5be5a7a7766cb79904f05a5a3009b
+---
+ core/java/android/provider/Settings.java           |   38 +++++++++++++++-----
+ .../com/android/server/ConnectivityService.java    |   35 +++++++++++++++++-
+ 2 files changed, 63 insertions(+), 10 deletions(-)
+
+diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
+index b072e68..d7e69ce 100644
+--- a/core/java/android/provider/Settings.java
++++ b/core/java/android/provider/Settings.java
+@@ -1288,6 +1288,24 @@ public final class Settings {
+         public static final String WIFI_NUM_ALLOWED_CHANNELS = "wifi_num_allowed_channels";
+ 
+         /**
++         * Allows automatic retrieval of mms contents
++         * <p>Type: INT</p>
++         * 0 -- false
++         * 1 -- true
++         * @hide
++         */
++         public static final String MMS_AUTO_RETRIEVAL = "mms_auto_retrieval";
++
++         /**
++         * Allows automatic retrieval of mms contents during roaming
++         * <p>Type: INT</p>
++         * 0 -- false
++         * 1 -- true
++         * @hide
++         */
++         public static final String MMS_AUTO_RETRIEVAL_ON_ROAMING = "mms_auto_on_roaming";
++
++         /**
+          * Determines whether remote devices may discover and/or connect to
+          * this device.
+          * <P>Type: INT</P>
+@@ -2876,31 +2894,31 @@ public final class Settings {
+          */
+         public static final String WIDGET_BUTTONS = "expanded_widget_buttons";
+ 
+-        /** 
++        /**
+         * Notification Power Widget - Custom Brightness Mode
+         * @hide
+         */
+         public static final String EXPANDED_BRIGHTNESS_MODE = "expanded_brightness_mode";
+ 
+-        /** 
++        /**
+         * Notification Power Widget - Custom Network Mode
+         * @hide
+         */
+         public static final String EXPANDED_NETWORK_MODE = "expanded_network_mode";
+ 
+-        /** 
++        /**
+         * Notification Power Widget - Custom Screen Timeout
+         * @hide
+         */
+         public static final String EXPANDED_SCREENTIMEOUT_MODE = "expanded_screentimeout_mode";
+ 
+-        /** 
++        /**
+         * Notification Power Widget - Custom Ring Mode
+         * @hide
+         */
+         public static final String EXPANDED_RING_MODE = "expanded_ring_mode";
+ 
+-        /** 
++        /**
+         * Notification Power Widget - Custom Torch Mode
+         * @hide
+         */
+@@ -2912,13 +2930,13 @@ public final class Settings {
+         */
+         public static final String EXPANDED_MOBILEDATANETWORK_MODE = "expanded_mobiledatanetwork_mode";
+ 
+-        /** 
++        /**
+         * Enables the Screen-on animation
+         * @hide
+         */
+         public static final String ELECTRON_BEAM_ANIMATION_ON = "electron_beam_animation_on";
+ 
+-        /** 
++        /**
+         * Enables the Screen-off animation
+         * @hide
+         */
+@@ -3024,6 +3042,8 @@ public final class Settings {
+             WIFI_STATIC_NETMASK,
+             WIFI_STATIC_DNS1,
+             WIFI_STATIC_DNS2,
++            MMS_AUTO_RETRIEVAL,
++            MMS_AUTO_RETRIEVAL_ON_ROAMING,
+             BLUETOOTH_DISCOVERABILITY,
+             BLUETOOTH_DISCOVERABILITY_TIMEOUT,
+             DIM_SCREEN,
+@@ -3770,7 +3790,7 @@ public final class Settings {
+          * @hide
+          */
+         public static final String ASSISTED_GPS_ENABLED = "assisted_gps_enabled";
+-        
++
+          /**
+          * External BT GPS device
+          * @hide
+@@ -5143,5 +5163,5 @@ public final class Settings {
+     public static String getGTalkDeviceId(long androidId) {
+         return "android-" + Long.toHexString(androidId);
+     }
+-    
++
+ }
+diff --git a/services/java/com/android/server/ConnectivityService.java b/services/java/com/android/server/ConnectivityService.java
+index 343f4ca..6a96d95 100644
+--- a/services/java/com/android/server/ConnectivityService.java
++++ b/services/java/com/android/server/ConnectivityService.java
+@@ -42,6 +42,7 @@ import android.os.RemoteException;
+ import android.os.ServiceManager;
+ import android.os.SystemProperties;
+ import android.provider.Settings;
++import android.telephony.TelephonyManager;
+ import android.text.TextUtils;
+ import android.util.EventLog;
+ import android.util.Slog;
+@@ -719,7 +720,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
+         // TODO - move this into the MobileDataStateTracker
+         int usedNetworkType = networkType;
+         if(networkType == ConnectivityManager.TYPE_MOBILE) {
+-            if (!getMobileDataEnabled()) {
++            if (!canSetupData(networkType, feature)) {
+                 if (DBG) Slog.d(TAG, "requested special network with data disabled - rejected");
+                 return Phone.APN_TYPE_NOT_AVAILABLE;
+             }
+@@ -789,6 +790,38 @@ public class ConnectivityService extends IConnectivityManager.Stub {
+         return Phone.APN_TYPE_NOT_AVAILABLE;
+     }
+ 
++    /**
++    * Report on whether data connectivity can be setup for any networkType and feature.
++    * @param networkType Network type
++    * @param feature Feature
++    * @return boolean
++    */
++    private boolean canSetupData(int networkType, String feature) {
++        if (getMobileDataEnabled()) {
++            return true;
++        }
++
++        // Get the MMS retrieval settings. Defaults to enabled with roaming disabled
++        final ContentResolver resolver = mContext.getContentResolver();
++        boolean mmsAutoRetrieval = Settings.System.getInt(resolver,
++                Settings.System.MMS_AUTO_RETRIEVAL, 1) == 1;
++        boolean mmsRetrievalRoaming = Settings.System.getInt(resolver,
++                Settings.System.MMS_AUTO_RETRIEVAL_ON_ROAMING, 0) == 1;
++
++        // Allow automatic Mms connections if user has enabled it
++        if (mmsAutoRetrieval && TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
++            // don't allow MMS connections while roaming if disabled
++            TelephonyManager tm = (TelephonyManager)
++                    mContext.getSystemService(Context.TELEPHONY_SERVICE);
++            if (tm.isNetworkRoaming() && !mmsRetrievalRoaming) {
++                return false;
++            }
++            return true;
++        }
++
++        return false;
++    }
++
+     // javadoc from interface
+     public int stopUsingNetworkFeature(int networkType, String feature) {
+         enforceChangePermission();
+-- 
+1.7.9.5
+

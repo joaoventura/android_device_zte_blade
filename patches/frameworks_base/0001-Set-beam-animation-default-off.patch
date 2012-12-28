@@ -1,0 +1,26 @@
+From 6275aafd56bfdf6e732de264c2810dc640112300 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Sat, 10 Nov 2012 14:53:06 +0000
+Subject: [PATCH] Set beam animation default off
+
+Change-Id: I42ecc01a09919c11c72bc0056c45861b5413d23b
+---
+ core/res/res/values/config.xml |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/res/res/values/config.xml b/core/res/res/values/config.xml
+index 6163c08..dda51ad 100644
+--- a/core/res/res/values/config.xml
++++ b/core/res/res/values/config.xml
+@@ -404,7 +404,7 @@
+     <bool name="config_enableScreenOnAnimation">false</bool>
+ 
+     <!-- Enable the screen-off animation -->
+-    <bool name="config_enableScreenOffAnimation">true</bool>
++    <bool name="config_enableScreenOffAnimation">false</bool>
+ 
+     <!-- Configure rotary bottom margin -->
+     <integer name="config_rotaryMarginBottomDIP">60</integer>
+-- 
+1.7.9.5
+

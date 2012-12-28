@@ -1,0 +1,35 @@
+From e5805d7c114b9609c545aa17af02af1ffbaeb2fc Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Sat, 10 Nov 2012 14:13:10 +0000
+Subject: [PATCH] Set default lockscreen to slider
+
+Change-Id: I0259797071daaf6dba5d29f10aa3fc314bdf79f8
+---
+ .../android/internal/policy/impl/LockScreen.java   |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/policy/src/com/android/internal/policy/impl/LockScreen.java b/policy/src/com/android/internal/policy/impl/LockScreen.java
+index ebf0115..cc4c0cc 100644
+--- a/policy/src/com/android/internal/policy/impl/LockScreen.java
++++ b/policy/src/com/android/internal/policy/impl/LockScreen.java
+@@ -164,7 +164,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
+             Settings.System.TRACKBALL_UNLOCK_SCREEN, 0) == 1);
+ 
+     private boolean mSliderUnlockScreen = (Settings.System.getInt(mContext.getContentResolver(),
+-            Settings.System.SLIDER_UNLOCK_SCREEN, 0) == 1);
++            Settings.System.SLIDER_UNLOCK_SCREEN, 1) == 1);
+ 
+     private boolean mMenuUnlockScreen = (Settings.System.getInt(mContext.getContentResolver(),
+             Settings.System.MENU_UNLOCK_SCREEN, 0) == 1);
+@@ -220,7 +220,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
+     };
+ 
+     private int mLockscreenStyle = (Settings.System.getInt(mContext.getContentResolver(),
+-            Settings.System.LOCKSCREEN_STYLE_PREF, 5));
++            Settings.System.LOCKSCREEN_STYLE_PREF, LockscreenStyle.getIdByStyle(LockscreenStyle.Slider)));
+ 
+     private int mCustomIconStyle = Settings.System.getInt(mContext.getContentResolver(),
+             Settings.System.LOCKSCREEN_CUSTOM_ICON_STYLE, 1);
+-- 
+1.7.9.5
+

@@ -1,0 +1,26 @@
+From 3c19a55ab162a674abc426a210030a99c79c253a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Sat, 10 Nov 2012 14:07:14 +0000
+Subject: [PATCH] Set default call ui to slider
+
+Change-Id: I9bc90a711c3a345bda9bc4158a538a943127d4f8
+---
+ src/com/android/phone/InCallTouchUi.java |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/com/android/phone/InCallTouchUi.java b/src/com/android/phone/InCallTouchUi.java
+index 0c9e6fd..970b729 100644
+--- a/src/com/android/phone/InCallTouchUi.java
++++ b/src/com/android/phone/InCallTouchUi.java
+@@ -755,7 +755,7 @@ public class InCallTouchUi extends FrameLayout
+     private void updateInCallStyle() {
+         int inCallStyle = Settings.System.getInt(mContext.getContentResolver(),
+                 Settings.System.IN_CALL_STYLE_PREF,
+-                InCallStyle.getIdByStyle(InCallStyle.Ring));
++                InCallStyle.getIdByStyle(InCallStyle.Slider));
+         boolean rotaryHideArrows = Settings.System.getInt(mContext.getContentResolver(),
+                 Settings.System.LOCKSCREEN_ROTARY_HIDE_ARROWS, 0) == 1;
+ 
+-- 
+1.7.9.5
+
