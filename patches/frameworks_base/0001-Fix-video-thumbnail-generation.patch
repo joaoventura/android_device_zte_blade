@@ -1,10 +1,10 @@
-From 9c42415cdfc4dec61a5d2f954e08c00d985ae443 Mon Sep 17 00:00:00 2001
+From 3baaa02d63f1e44786addc4a55a3ec93d98b7ab6 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
-Date: Mon, 17 Dec 2012 18:23:03 +0000
+Date: Sat, 19 Jan 2013 18:10:36 +0000
 Subject: [PATCH] Fix video thumbnail generation (by gntcs
  https://github.com/GenetICS/frameworks_base/)
 
-Change-Id: I7d711065a938ed306334e62953dd61cb6dbff416
+Change-Id: Ie899ff8f4cc8435c579d277635644c5fd2475824
 ---
  include/media/stagefright/OMXCodec.h               |    2 +-
  media/java/android/media/ThumbnailUtils.java       |    2 +
@@ -13,10 +13,10 @@ Change-Id: I7d711065a938ed306334e62953dd61cb6dbff416
  4 files changed, 87 insertions(+), 11 deletions(-)
 
 diff --git a/include/media/stagefright/OMXCodec.h b/include/media/stagefright/OMXCodec.h
-index e338ba4..e3fe9cc 100755
+index 5b8051f..5b9c803 100755
 --- a/include/media/stagefright/OMXCodec.h
 +++ b/include/media/stagefright/OMXCodec.h
-@@ -380,7 +380,7 @@ private:
+@@ -383,7 +383,7 @@ private:
              const void *data, size_t size,
              unsigned *profile, unsigned *level, const sp<MetaData> &meta);
  #ifdef QCOM_HARDWARE
@@ -26,7 +26,7 @@ index e338ba4..e3fe9cc 100755
  
      OMXCodec(const OMXCodec &);
 diff --git a/media/java/android/media/ThumbnailUtils.java b/media/java/android/media/ThumbnailUtils.java
-index 078d4af..14a5345 100644
+index 078d4af..6ecf12e 100644
 --- a/media/java/android/media/ThumbnailUtils.java
 +++ b/media/java/android/media/ThumbnailUtils.java
 @@ -150,6 +150,8 @@ public class ThumbnailUtils {
@@ -34,15 +34,15 @@ index 078d4af..14a5345 100644
              retriever.setDataSource(filePath);
              bitmap = retriever.getFrameAtTime(-1);
 +        } catch (OutOfMemoryError e) {
-+                Log.e(TAG, "Got OOM error", e);
++            Log.e(TAG, "Got OOM error", e);
          } catch (IllegalArgumentException ex) {
              // Assume this is a corrupt video file
          } catch (RuntimeException ex) {
 diff --git a/media/libstagefright/OMXCodec.cpp b/media/libstagefright/OMXCodec.cpp
-index ea4f79d..26447ad 100644
+index 2a76cbb..e928994 100644
 --- a/media/libstagefright/OMXCodec.cpp
 +++ b/media/libstagefright/OMXCodec.cpp
-@@ -2048,6 +2048,9 @@ OMXCodec::OMXCodec(
+@@ -2110,6 +2110,9 @@ OMXCodec::OMXCodec(
        mState(LOADED),
        mInitialBufferSubmit(true),
        mSignalledEOS(false),
@@ -52,7 +52,7 @@ index ea4f79d..26447ad 100644
        mNoMoreOutputData(false),
        mOutputPortSettingsHaveChanged(false),
        mSeekTimeUs(-1),
-@@ -2072,6 +2075,9 @@ OMXCodec::OMXCodec(
+@@ -2134,6 +2137,9 @@ OMXCodec::OMXCodec(
  #endif
        )
                          ? NULL : nativeWindow) {
@@ -62,7 +62,7 @@ index ea4f79d..26447ad 100644
      mPortStatus[kPortIndexInput] = ENABLED;
      mPortStatus[kPortIndexOutput] = ENABLED;
  
-@@ -4198,10 +4204,12 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
+@@ -4284,10 +4290,12 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
          // mNoMoreOutputData to false so fillOutputBuffer gets called on
          // the first output buffer (see comment in fillOutputBuffer), and
          // mSignalledEOS must be true so drainInputBuffer is not executed
@@ -76,7 +76,7 @@ index ea4f79d..26447ad 100644
  #endif
      } else {
          mNoMoreOutputData = false;
-@@ -5917,10 +5925,10 @@ status_t OMXCodec::pause() {
+@@ -6006,10 +6014,10 @@ status_t OMXCodec::pause() {
  
  }
  #ifdef QCOM_HARDWARE
@@ -90,7 +90,7 @@ index ea4f79d..26447ad 100644
  #endif
  
 diff --git a/media/libstagefright/StagefrightMetadataRetriever.cpp b/media/libstagefright/StagefrightMetadataRetriever.cpp
-index 9b09bd1..57b0d73 100755
+index 9b09bd1..b4a5d22 100755
 --- a/media/libstagefright/StagefrightMetadataRetriever.cpp
 +++ b/media/libstagefright/StagefrightMetadataRetriever.cpp
 @@ -1,6 +1,6 @@
@@ -137,7 +137,7 @@ index 9b09bd1..57b0d73 100755
  
  status_t StagefrightMetadataRetriever::setDataSource(
          const char *uri, const KeyedVector<String8, String8> *headers) {
-+
++    
 +#ifdef QCOM_HARDWARE
 +    LOGW("setDataSource(%s) %p", uri, this);
 +#else
@@ -268,5 +268,5 @@ index 9b09bd1..57b0d73 100755
  }
  
 -- 
-1.7.9.5
+1.7.10.4
 
