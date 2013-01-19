@@ -1,6 +1,6 @@
 From e9dae048eefa96d5504cb360c7561c7f6e277a5b Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
-Date: Sat, 19 Jan 2013 17:40:23 +0000
+Date: Sat, 19 Jan 2013 17:40:24 +0000
 Subject: [PATCH] Add support for QCOM_LEGACY_OMX
 
 Change-Id: Id9e164349ab24df9b317ceeb80bb2337ffdaeb0d
@@ -69,12 +69,12 @@ index 8a43039..2a76cbb 100644
      case OMX_SEC_COLOR_FormatNV12LPhysicalAddress:
  #endif
              return (width * height * 3) / 2;
-+            
++
 +#ifdef QCOM_LEGACY_OMX
 +    case OMX_QCOM_COLOR_FormatYVU420SemiPlanar:
 +        return (((width + 15) & -16) * ((height + 15) & -16) * 3) / 2;
 +#endif
- 
+
  #ifdef SAMSUNG_CODEC_SUPPORT
      case OMX_SEC_COLOR_FormatNV12LVirtualAddress:
 @@ -1435,6 +1441,7 @@ void OMXCodec::setVideoInputFormat(
@@ -185,7 +185,7 @@ index 2ce8fa7..6161ba4 100644
 +    LOGI("Buffer color format: 0x%X", mColorFormat);
 +    LOGI("Video params: mWidth: %d, mHeight: %d, mCropWidth: %d, mCropHeight: %d, mCropTop: %d, mCropLeft: %d",
 +         mWidth, mHeight, mCropWidth, mCropHeight, mCropTop, mCropLeft);
-+    
++
      CHECK(mNativeWindow != NULL);
      CHECK(mCropWidth > 0);
      CHECK(mCropHeight > 0);
@@ -196,7 +196,7 @@ index 2ce8fa7..6161ba4 100644
 +#ifdef QCOM_LEGACY_OMX
 +    } else if (mColorFormat == OMX_QCOM_COLOR_FormatYVU420SemiPlanar) {
 +        // Legacy Qualcomm color format
-+        
++
 +        uint8_t *src_y = (uint8_t *)data;
 +        uint8_t *src_u = src_y + mAlign;
 +        uint8_t *dst_y = (uint8_t *)dst;
@@ -205,7 +205,7 @@ index 2ce8fa7..6161ba4 100644
 +        // Legacy codec doesn't return crop params. Ignore it for speedup :)
 +        memcpy(dst_y, src_y, mCropWidth * mCropHeight);
 +        memcpy(dst_u, src_u, mCropWidth * mCropHeight / 2);
-+        
++
 +        /*for(size_t y = 0; y < mCropHeight; ++y) {
 +            memcpy(dst_y, src_y, mCropWidth);
 +            dst_y += buf->stride;

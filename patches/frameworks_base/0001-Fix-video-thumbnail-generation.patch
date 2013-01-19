@@ -1,6 +1,6 @@
 From 3baaa02d63f1e44786addc4a55a3ec93d98b7ab6 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
-Date: Sat, 19 Jan 2013 18:10:36 +0000
+Date: Sat, 19 Jan 2013 18:10:37 +0000
 Subject: [PATCH] Fix video thumbnail generation (by gntcs
  https://github.com/GenetICS/frameworks_base/)
 
@@ -137,7 +137,7 @@ index 9b09bd1..b4a5d22 100755
  
  status_t StagefrightMetadataRetriever::setDataSource(
          const char *uri, const KeyedVector<String8, String8> *headers) {
-+    
++
 +#ifdef QCOM_HARDWARE
 +    LOGW("setDataSource(%s) %p", uri, this);
 +#else
