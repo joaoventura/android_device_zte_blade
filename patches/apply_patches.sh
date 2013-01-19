@@ -39,6 +39,7 @@ applyPatch 0001-Remove-tts-and-videoeditor.patch build build
 # QCOM_LEGACY_OMX and Fix video Thumbnails
 applyPatch 0001-Add-support-for-QCOM_LEGACY_OMX.patch frameworks_base frameworks/base
 applyPatch 0001-Fix-video-thumbnail-generation.patch frameworks_base frameworks/base
+applyPatch 0001-Fix-alignment-and-copy-size-for-legacy-QCOM-OMX.patch frameworks_base frameworks/base
 
 # Remove Trebuchet wallpapers
 applyPatch 0001-Trebuchet-Remove-wallpapers.patch packages_apps_Trebuchet packages/apps/Trebuchet
