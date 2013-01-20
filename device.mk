@@ -87,6 +87,7 @@ PRODUCT_COPY_FILES := \
         device/zte/blade/prebuilt/root/init.blade.rc:root/init.blade.rc \
         device/zte/blade/prebuilt/root/init.blade.usb.rc:root/init.blade.usb.rc \
         device/zte/blade/prebuilt/root/ueventd.blade.rc:root/ueventd.blade.rc \
+        device/zte/blade/prebuilt/system/etc/audio_policy.conf:system/etc/audio_policy.conf \
         device/zte/blade/prebuilt/system/etc/AudioFilter.csv:system/etc/AudioFilter.csv \
         device/zte/blade/prebuilt/system/etc/AutoVolumeControl.txt:system/etc/AutoVolumeControl.txt \
         device/zte/blade/prebuilt/system/etc/gps.conf:system/etc/gps.conf \
