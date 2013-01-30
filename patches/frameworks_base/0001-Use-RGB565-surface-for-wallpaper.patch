@@ -1,0 +1,79 @@
+From b9f2076ce646f73af55e4789a3d75dcae88c547d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Wed, 30 Jan 2013 17:32:47 +0000
+Subject: [PATCH] Use RGB565 surface for wallpaper
+
+The framebuffer only uses 16bpp on most legacy devices anyway, so this
+does not result in worse quality. It saves a lot of GPU fillrate and
+memory, though.
+
+(Original author: Grigori Goronzy <greg@blackbox>)
+
+Change-Id: I0133dec0ee0e122248027b422ba13b03f55e57a9
+---
+ core/java/android/app/WallpaperManager.java                    |    4 ++--
+ core/java/android/service/wallpaper/WallpaperService.java      |    2 +-
+ packages/SystemUI/src/com/android/systemui/ImageWallpaper.java |    5 ++++-
+ 3 files changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/core/java/android/app/WallpaperManager.java b/core/java/android/app/WallpaperManager.java
+index b1c1f30..dcd640c 100644
+--- a/core/java/android/app/WallpaperManager.java
++++ b/core/java/android/app/WallpaperManager.java
+@@ -350,7 +350,7 @@ public class WallpaperManager {
+         Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true);
+         if (bm != null) {
+             Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
+-            dr.setDither(false);
++            dr.setDither(true);
+             return dr;
+         }
+         return null;
+@@ -369,7 +369,7 @@ public class WallpaperManager {
+         Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false);
+         if (bm != null) {
+             Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
+-            dr.setDither(false);
++            dr.setDither(true);
+             return dr;
+         }
+         return null;
+diff --git a/core/java/android/service/wallpaper/WallpaperService.java b/core/java/android/service/wallpaper/WallpaperService.java
+index 18167b6..c95363c 100644
+--- a/core/java/android/service/wallpaper/WallpaperService.java
++++ b/core/java/android/service/wallpaper/WallpaperService.java
+@@ -186,7 +186,7 @@ public abstract class WallpaperService extends Service {
+         
+         final BaseSurfaceHolder mSurfaceHolder = new BaseSurfaceHolder() {
+             {
+-                mRequestedFormat = PixelFormat.RGBX_8888;
++                mRequestedFormat = PixelFormat.RGB_565;
+             }
+ 
+             @Override
+diff --git a/packages/SystemUI/src/com/android/systemui/ImageWallpaper.java b/packages/SystemUI/src/com/android/systemui/ImageWallpaper.java
+index 724679f..fc46443 100644
+--- a/packages/SystemUI/src/com/android/systemui/ImageWallpaper.java
++++ b/packages/SystemUI/src/com/android/systemui/ImageWallpaper.java
+@@ -23,6 +23,7 @@ import android.content.Context;
+ import android.content.Intent;
+ import android.graphics.Bitmap;
+ import android.graphics.Canvas;
++import android.graphics.Paint;
+ import android.graphics.Rect;
+ import android.graphics.Region.Op;
+ import android.opengl.GLUtils;
+@@ -372,7 +373,9 @@ public class ImageWallpaper extends WallpaperService {
+                         c.restore();
+                     }
+                     if (mBackground != null) {
+-                        c.drawBitmap(mBackground, 0, 0, null);
++                        Paint paint = new Paint();
++                        paint.setDither(true);
++                        c.drawBitmap(mBackground, 0, 0, paint);
+                     }
+                 } finally {
+                     sh.unlockCanvasAndPost(c);
+-- 
+1.7.10.4
+

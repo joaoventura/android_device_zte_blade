@@ -1,0 +1,69 @@
+From f790f290a3de5d20918e8aa43bb493cfe552708d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Wed, 30 Jan 2013 17:50:41 +0000
+Subject: [PATCH] Prefer 16bpp surface formats
+
+Adds a property to use RGB565 surface formats for the opaque
+surface default, enabled by default.
+
+(Original author: Grigori Goronzy <greg@blackbox>)
+
+Change-Id: Ia5aa00b9fcb197d25f7107a569103389a0337eb3
+---
+ services/surfaceflinger/SurfaceFlinger.cpp |   11 +++++++++--
+ services/surfaceflinger/SurfaceFlinger.h   |    2 +-
+ 2 files changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/services/surfaceflinger/SurfaceFlinger.cpp b/services/surfaceflinger/SurfaceFlinger.cpp
+index ca4f155..34eca35 100644
+--- a/services/surfaceflinger/SurfaceFlinger.cpp
++++ b/services/surfaceflinger/SurfaceFlinger.cpp
+@@ -113,7 +113,8 @@ SurfaceFlinger::SurfaceFlinger()
+ #endif
+         mConsoleSignals(0),
+         mSecureFrameBuffer(0),
+-        mUseDithering(false)
++        mUseDithering(false),
++        mPrefer16bpp(0)
+ {
+     init();
+ }
+@@ -137,6 +138,9 @@ void SurfaceFlinger::init()
+     property_get("persist.sys.use_dithering", value, "0");
+     mUseDithering = atoi(value) == 1;
+ 
++    property_get("persist.sys.prefer_16bpp", value, "1");
++    mPrefer16bpp = atoi(value);
++
+     if (mDebugDDMS) {
+         DdmConnection::start(getServiceName());
+     }
+@@ -1552,7 +1556,10 @@ sp<Layer> SurfaceFlinger::createNormalSurface(
+ #ifdef NO_RGBX_8888
+         format = PIXEL_FORMAT_RGB_565;
+ #else
+-        format = PIXEL_FORMAT_RGBX_8888;
++        if (mPrefer16bpp)
++           format = PIXEL_FORMAT_RGB_565;
++        else
++           format = PIXEL_FORMAT_RGBX_8888;
+ #endif
+         break;
+     }
+diff --git a/services/surfaceflinger/SurfaceFlinger.h b/services/surfaceflinger/SurfaceFlinger.h
+index e6b465d..83c4f18 100644
+--- a/services/surfaceflinger/SurfaceFlinger.h
++++ b/services/surfaceflinger/SurfaceFlinger.h
+@@ -443,8 +443,8 @@ private:
+ 
+    // only written in the main thread, only read in other threads
+    volatile     int32_t                     mSecureFrameBuffer;
+-
+                 bool                        mUseDithering;
++                bool                        mPrefer16bpp;
+ };
+ 
+ // ---------------------------------------------------------------------------
+-- 
+1.7.10.4
+

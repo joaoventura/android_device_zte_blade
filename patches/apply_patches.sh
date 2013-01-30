@@ -44,3 +44,8 @@ applyPatch 0001-Fix-alignment-and-copy-size-for-legacy-QCOM-OMX.patch frameworks
 # Remove Trebuchet wallpapers
 applyPatch 0001-Trebuchet-Remove-wallpapers.patch packages_apps_Trebuchet packages/apps/Trebuchet
 
+# 16 bpp patches
+applyPatch 0001-Use-RGB565-surface-for-wallpaper.patch frameworks_base frameworks/base
+applyPatch 0001-Prefer-16bpp-formats-for-opaque-bitmaps.patch frameworks_base frameworks/base
+applyPatch 0001-Prefer-16bpp-surface-formats.patch frameworks_base frameworks/base
+
