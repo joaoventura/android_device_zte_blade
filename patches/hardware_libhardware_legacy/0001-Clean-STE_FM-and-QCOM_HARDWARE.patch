@@ -1,0 +1,82 @@
+From 27d97b5c56e92a887603b961a56d97dc7af62a40 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Wed, 13 Mar 2013 20:31:07 +0000
+Subject: [PATCH] Clean STE_FM and QCOM_HARDWARE
+
+Change-Id: If78405a8b6a999b55fac7908a7037b13c2c0fa4b
+---
+ include/hardware_legacy/AudioSystemLegacy.h |   21 ++++++---------------
+ 1 file changed, 6 insertions(+), 15 deletions(-)
+
+diff --git a/include/hardware_legacy/AudioSystemLegacy.h b/include/hardware_legacy/AudioSystemLegacy.h
+index 9bfdca6..1bbc414 100644
+--- a/include/hardware_legacy/AudioSystemLegacy.h
++++ b/include/hardware_legacy/AudioSystemLegacy.h
+@@ -62,13 +62,10 @@ enum audio_source {
+     AUDIO_SOURCE_CAMCORDER = 5,
+     AUDIO_SOURCE_VOICE_RECOGNITION = 6,
+     AUDIO_SOURCE_VOICE_COMMUNICATION = 7,
+-#if defined(QCOM_HARDWARE) && !defined(USES_AUDIO_LEGACY)
++#if defined(QCOM_HARDWARE) && !defined(USES_AUDIO_LEGACY) || defined(STE_FM)
+     AUDIO_SOURCE_FM_RX = 8,
+     AUDIO_SOURCE_FM_RX_A2DP = 9,
+-#endif
+-#ifdef STE_FM
+-    AUDIO_SOURCE_FM_RX = 8,
+-    AUDIO_SOURCE_MAX = AUDIO_SOURCE_FM_RX,
++    AUDIO_SOURCE_MAX = AUDIO_SOURCE_FM_RX_A2DP,
+ #else
+     AUDIO_SOURCE_MAX = AUDIO_SOURCE_VOICE_COMMUNICATION,
+ #endif
+@@ -252,7 +249,7 @@ public:
+         DEVICE_OUT_AUX_DIGITAL = 0x400,
+         DEVICE_OUT_ANLG_DOCK_HEADSET = 0x800,
+         DEVICE_OUT_DGTL_DOCK_HEADSET = 0x1000,
+-#if defined(QCOM_HARDWARE) && !defined(USES_AUDIO_LEGACY)
++#if defined(QCOM_HARDWARE) && !defined(USES_AUDIO_LEGACY) || defined(STE_FM)
+         DEVICE_OUT_FM = 0x2000,
+         DEVICE_OUT_ANC_HEADSET = 0x4000,
+         DEVICE_OUT_ANC_HEADPHONE = 0x8000,
+@@ -261,10 +258,6 @@ public:
+         DEVICE_OUT_PROXY = 0x40000,
+         DEVICE_OUT_DEFAULT = 0x80000,
+ #else
+-#if defined(STE_FM)
+-        DEVICE_OUT_FM = 0x2000,
+-        DEVICE_OUT_FM_TX = 0x10000,
+-#endif
+         DEVICE_OUT_DEFAULT = 0x8000,
+ #endif
+         DEVICE_OUT_ALL = (DEVICE_OUT_EARPIECE | DEVICE_OUT_SPEAKER | DEVICE_OUT_WIRED_HEADSET |
+@@ -272,14 +265,11 @@ public:
+                 DEVICE_OUT_BLUETOOTH_SCO_CARKIT | DEVICE_OUT_BLUETOOTH_A2DP | DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
+                 DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER | DEVICE_OUT_AUX_DIGITAL |
+                 DEVICE_OUT_ANLG_DOCK_HEADSET | DEVICE_OUT_DGTL_DOCK_HEADSET |
+-#if defined(QCOM_HARDWARE) && !defined(USES_AUDIO_LEGACY)
++#if defined(QCOM_HARDWARE) && !defined(USES_AUDIO_LEGACY) || defined(STE_FM)
+                 DEVICE_OUT_ANC_HEADSET | DEVICE_OUT_ANC_HEADPHONE |
+                 DEVICE_OUT_FM | DEVICE_OUT_FM_TX | DEVICE_OUT_DIRECTOUTPUT |
+                 DEVICE_OUT_PROXY |
+ #endif
+-#if defined(STE_FM)
+-                DEVICE_OUT_FM | DEVICE_OUT_FM_TX |
+-#endif
+                 DEVICE_OUT_DEFAULT),
+         DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP | DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
+                 DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER),
+@@ -317,10 +307,11 @@ public:
+                 DEVICE_IN_VOICE_CALL | DEVICE_IN_BACK_MIC |
+ #if defined(QCOM_HARDWARE) && !defined(USES_AUDIO_LEGACY)
+                 DEVICE_IN_ANC_HEADSET | DEVICE_IN_FM_RX | DEVICE_IN_FM_RX_A2DP |
+-#endif
++#else
+ #ifdef STE_FM
+                 DEVICE_IN_FM_RADIO_RX |
+ #endif
++#endif
+                 DEVICE_IN_DEFAULT)
+     };
+ 
+-- 
+1.7.10.4
+

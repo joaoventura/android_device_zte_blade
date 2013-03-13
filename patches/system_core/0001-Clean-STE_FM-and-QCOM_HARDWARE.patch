@@ -1,0 +1,93 @@
+From f922f26d0f2685a4eb4ae9568d108b7ac53f8637 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Wed, 13 Mar 2013 20:32:12 +0000
+Subject: [PATCH] Clean STE_FM and QCOM_HARDWARE
+
+Change-Id: Id1c6888938f6390c1a56800054e6c9036886ac66
+---
+ include/system/audio.h |   21 ++++++---------------
+ 1 file changed, 6 insertions(+), 15 deletions(-)
+
+diff --git a/include/system/audio.h b/include/system/audio.h
+index af20bde..28020b7 100644
+--- a/include/system/audio.h
++++ b/include/system/audio.h
+@@ -66,13 +66,10 @@ typedef enum {
+     AUDIO_SOURCE_CAMCORDER           = 5,
+     AUDIO_SOURCE_VOICE_RECOGNITION   = 6,
+     AUDIO_SOURCE_VOICE_COMMUNICATION = 7,
+-#ifdef QCOM_HARDWARE
++#if defined(QCOM_HARDWARE) || defined(STE_FM)
+     AUDIO_SOURCE_FM_RX               = 8,
+     AUDIO_SOURCE_FM_RX_A2DP          = 9,
+ #endif
+-#ifdef STE_FM
+-    AUDIO_SOURCE_FM_RX               = 8,
+-#endif
+     AUDIO_SOURCE_CNT,
+     AUDIO_SOURCE_MAX                 = AUDIO_SOURCE_CNT - 1,
+ } audio_source_t;
+@@ -302,7 +299,7 @@ typedef enum {
+     AUDIO_DEVICE_OUT_ANLG_DOCK_HEADSET         = 0x800,
+     AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET         = 0x1000,
+     AUDIO_DEVICE_OUT_FM                        = 0x2000,
+-#if defined(QCOM_HARDWARE) && !defined(USES_AUDIO_LEGACY)
++#if defined(QCOM_HARDWARE) && !defined(USES_AUDIO_LEGACY) || defined(STE_FM)
+     AUDIO_DEVICE_OUT_ANC_HEADSET               = 0x4000,
+     AUDIO_DEVICE_OUT_ANC_HEADPHONE             = 0x8000,
+     AUDIO_DEVICE_OUT_FM_TX                     = 0x10000,
+@@ -310,9 +307,6 @@ typedef enum {
+     AUDIO_DEVICE_OUT_PROXY                     = 0x40000,
+     AUDIO_DEVICE_OUT_DEFAULT                   = 0x80000,
+ #else
+-#ifdef STE_FM
+-    AUDIO_DEVICE_OUT_FM_TX                     = 0x10000,
+-#endif
+     AUDIO_DEVICE_OUT_DEFAULT                   = 0x8000,
+ #endif
+     AUDIO_DEVICE_OUT_ALL      = (AUDIO_DEVICE_OUT_EARPIECE |
+@@ -328,7 +322,7 @@ typedef enum {
+                                  AUDIO_DEVICE_OUT_AUX_DIGITAL |
+                                  AUDIO_DEVICE_OUT_ANLG_DOCK_HEADSET |
+                                  AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET |
+-#if defined(QCOM_HARDWARE) && !defined(USES_AUDIO_LEGACY)
++#if defined(QCOM_HARDWARE) && !defined(USES_AUDIO_LEGACY) || defined(STE_FM)
+                                  AUDIO_DEVICE_OUT_FM |
+                                  AUDIO_DEVICE_OUT_ANC_HEADSET |
+                                  AUDIO_DEVICE_OUT_ANC_HEADPHONE |
+@@ -336,10 +330,6 @@ typedef enum {
+                                  AUDIO_DEVICE_OUT_DIRECTOUTPUT |
+                                  AUDIO_DEVICE_OUT_PROXY |
+ #endif
+-#ifdef STE_FM
+-                                 AUDIO_DEVICE_OUT_FM |
+-                                 AUDIO_DEVICE_OUT_FM_TX |
+-#endif
+                                  AUDIO_DEVICE_OUT_DEFAULT),
+     AUDIO_DEVICE_OUT_ALL_A2DP = (AUDIO_DEVICE_OUT_BLUETOOTH_A2DP |
+                                  AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
+@@ -371,7 +361,7 @@ typedef enum {
+     AUDIO_DEVICE_IN_VOICE_CALL            = 0x400000,
+     AUDIO_DEVICE_IN_BACK_MIC              = 0x800000,
+ #ifdef STE_FM
+-    AUDIO_DEVICE_IN_FM_RADIO_RX           = 0x1000000,
++    AUDIO_DEVICE_IN_FM_RX                 = 0x1000000,
+ #endif
+ #endif
+     AUDIO_DEVICE_IN_DEFAULT               = 0x80000000,
+@@ -388,10 +378,11 @@ typedef enum {
+                                AUDIO_DEVICE_IN_ANC_HEADSET |
+                                AUDIO_DEVICE_IN_FM_RX |
+                                AUDIO_DEVICE_IN_FM_RX_A2DP |
+-#endif
++#else
+ #ifdef STE_FM
+                                AUDIO_DEVICE_IN_FM_RADIO_RX |
+ #endif
++#endif
+                                AUDIO_DEVICE_IN_DEFAULT),
+     AUDIO_DEVICE_IN_ALL_SCO = AUDIO_DEVICE_IN_BLUETOOTH_SCO_HEADSET,
+ } audio_devices_t;
+-- 
+1.7.10.4
+

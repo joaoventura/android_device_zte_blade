@@ -58,3 +58,8 @@ applyPatch 0001-Clean-STE_FM-AUDIO_SOURCE_FM-to-match-QCOM-FM-1-3.patch framewor
 applyPatch 0001-Clean-STE_FM-AUDIO_SOURCE_FM-to-match-QCOM-FM-2-3.patch hardware_libhardware_legacy hardware/libhardware_legacy
 applyPatch 0001-Clean-STE_FM-AUDIO_SOURCE_FM-to-match-QCOM-FM-3-3.patch system_core system/core
 
+# Clean STE_FM and QCOM_HARDWARE mix
+applyPatch 0001-Clean-STE_FM-and-QCOM_HARDWARE.patch hardware_libhardware_legacy hardware/libhardware_legacy
+applyPatch 0001-Clean-STE_FM-and-QCOM_HARDWARE.patch system_core system/core
+
+
