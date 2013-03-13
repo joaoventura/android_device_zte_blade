@@ -68,7 +68,8 @@ PRODUCT_PACKAGES += \
 
 # FM Radio
 PRODUCT_PACKAGES += \
-        libfmradio.si4708
+        libfmradio.si4708 \
+        FmRadioReceiver
 
 # Other
 PRODUCT_PACKAGES += \
@@ -116,6 +117,10 @@ PRODUCT_COPY_FILES += \
         device/zte/blade/firmware/device.bin:system/wifi/device.bin \
         device/zte/blade/firmware/eeprom.bin:system/wifi/eeprom.bin \
         device/zte/blade/firmware/eeprom.data:system/wifi/eeprom.data
+
+# FM Radio
+PRODUCT_COPY_FILES += \
+        frameworks/base/data/etc/com.stericsson.hardware.fm.receiver.xml:system/etc/permissions/com.stericsson.hardware.fm.receiver.xml
 
 # These are the hardware-specific features
 PRODUCT_COPY_FILES += \

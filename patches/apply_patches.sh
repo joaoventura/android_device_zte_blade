@@ -51,3 +51,4 @@ applyPatch 0001-Prefer-16bpp-surface-formats.patch frameworks_base frameworks/ba
 
 # FM radio
 applyPatch 0001-Legacy-FM-stream-support.patch frameworks_base frameworks/base
+applyPatch 0001-FmRadioReceiver-use-legacy-FM-routing.patch development_samples development/samples
