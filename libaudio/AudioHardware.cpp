@@ -185,7 +185,7 @@ AudioHardware::AudioHardware() :
         ioctl(m7xsnddriverfd, SND_AVC_CTL, &AUTO_VOLUME_ENABLED);
         ioctl(m7xsnddriverfd, SND_AGC_CTL, &AUTO_VOLUME_ENABLED);
     }
-	else LOGE("Could not open MSM SND driver.");
+    else LOGE("Could not open MSM SND driver.");
 }
 
 AudioHardware::~AudioHardware()
@@ -379,12 +379,12 @@ status_t AudioHardware::setParameters(const String8& keyValuePairs)
     }
 
 #ifdef HAVE_FM_RADIO
-    key = String8(android::AudioParameter::keyFmOn);
+    key = String8("fm_on");
     int devices;
     if (param.getInt(key, devices) == NO_ERROR) {
        setFmOnOff(true);
     }
-    key = String8(android::AudioParameter::keyFmOff);
+    key = String8("fm_off");
     if (param.getInt(key, devices) == NO_ERROR) {
        setFmOnOff(false);
     }
@@ -414,7 +414,7 @@ status_t AudioHardware::setParameters(const String8& keyValuePairs)
             mTtyMode = TTY_OFF;
         }
     } else {
-	mTtyMode = TTY_OFF;
+    mTtyMode = TTY_OFF;
     }
     doRouting(NULL);
 
@@ -1151,12 +1151,12 @@ status_t AudioHardware::setFmOnOff(int onoff)
     int ret;
 
     if (onoff) {
-	if(fmfd < 0)
-	    fmfd = open("/dev/si4708", O_RDWR);
+        if (fmfd < 0)
+            fmfd = open("/dev/si4708", O_RDWR);
         mFmRadioEnabled = true;
-	LOGV("mFmVolume=%i",mFmVolume);
-	if (ioctl(fmfd, Si4708_IOC_SET_VOL, &mFmVolume) < 0) {
-	    LOGE("set_volume_fm error.");
+        LOGV("mFmVolume=%i",mFmVolume);
+        if (ioctl(fmfd, Si4708_IOC_SET_VOL, &mFmVolume) < 0) {
+            LOGE("set_volume_fm error.");
             return -EIO;
         }
     } else {
@@ -1241,8 +1241,8 @@ status_t AudioHardware::doAudioRouteOrMute(uint32_t device)
     mFmPrev=mFmRadioEnabled;
 #ifdef HAVE_FM_RADIO
     if(mFmRadioEnabled && (device == SND_DEVICE_HEADSET)) {
-      mute = 0;
-      LOGI("unmute for radio");
+        mute = 0;
+        LOGI("unmute for radio");
     }
 #endif
 
@@ -1638,7 +1638,7 @@ status_t AudioHardware::AudioStreamOutMSM72xx::setParameters(const String8& keyV
     if (param.getInt(key, device) == NO_ERROR) {
         mDevices = device;
         LOGV("set output routing %x", mDevices);
-	status = mHardware->setParameters(keyValuePairs);
+    status = mHardware->setParameters(keyValuePairs);
         status = mHardware->doRouting(NULL);
         param.remove(key);
     }
@@ -2158,10 +2158,10 @@ status_t AudioHardware::AudioStreamInMSM72xx::setParameters(const String8& keyVa
 
 status_t AudioHardware::setFmVolume(float v)
 {
-    mFmVolume = (AudioSystem::logToLinear(v) +5) / 7;
+    mFmVolume = (android::AudioSystem::logToLinear(v) +5) / 7;
     if(mFmRadioEnabled) {
-	if (ioctl(fmfd, Si4708_IOC_SET_VOL, &mFmVolume) < 0) {
-	    LOGE("set_volume_fm error.");
+    if (ioctl(fmfd, Si4708_IOC_SET_VOL, &mFmVolume) < 0) {
+        LOGE("set_volume_fm error.");
             return -EIO;
         }
     }
