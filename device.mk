@@ -66,6 +66,10 @@ PRODUCT_PACKAGES += \
         VisualizationWallpapers \
         librs_jni
 
+# FM Radio
+PRODUCT_PACKAGES += \
+        libfmradio.si4708
+
 # Other
 PRODUCT_PACKAGES += \
         dexpreopt
