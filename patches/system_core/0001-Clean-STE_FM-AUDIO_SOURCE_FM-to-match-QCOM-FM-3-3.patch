@@ -1,0 +1,29 @@
+From 22066744c976e0803083fbfe6993cc07ef5d27f4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Wed, 13 Mar 2013 18:36:15 +0000
+Subject: [PATCH] Clean STE_FM AUDIO_SOURCE_FM to match QCOM FM (3/3)
+
+This patch changes the FM audio source of STE_FM to match the QCOM.
+This allows for further cleanups to set FM framework in ICS as clean as in JB
+
+Change-Id: Icb3ab428da42a3d1e8b5f466cd59f183407e8b91
+---
+ include/system/audio.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/system/audio.h b/include/system/audio.h
+index 051328f..af20bde 100644
+--- a/include/system/audio.h
++++ b/include/system/audio.h
+@@ -71,7 +71,7 @@ typedef enum {
+     AUDIO_SOURCE_FM_RX_A2DP          = 9,
+ #endif
+ #ifdef STE_FM
+-    AUDIO_SOURCE_FM_RADIO_RX         = 8,
++    AUDIO_SOURCE_FM_RX               = 8,
+ #endif
+     AUDIO_SOURCE_CNT,
+     AUDIO_SOURCE_MAX                 = AUDIO_SOURCE_CNT - 1,
+-- 
+1.7.10.4
+

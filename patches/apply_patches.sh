@@ -52,3 +52,9 @@ applyPatch 0001-Prefer-16bpp-surface-formats.patch frameworks_base frameworks/ba
 # FM radio
 applyPatch 0001-Legacy-FM-stream-support.patch frameworks_base frameworks/base
 applyPatch 0001-FmRadioReceiver-use-legacy-FM-routing.patch development_samples development/samples
+
+# Change STE_FM AUDIO_SOURCE_FM_RADIO_RX to AUDIO_SOURCE_FM_RX
+applyPatch 0001-Clean-STE_FM-AUDIO_SOURCE_FM-to-match-QCOM-FM-1-3.patch frameworks_base frameworks/base
+applyPatch 0001-Clean-STE_FM-AUDIO_SOURCE_FM-to-match-QCOM-FM-2-3.patch hardware_libhardware_legacy hardware/libhardware_legacy
+applyPatch 0001-Clean-STE_FM-AUDIO_SOURCE_FM-to-match-QCOM-FM-3-3.patch system_core system/core
+
