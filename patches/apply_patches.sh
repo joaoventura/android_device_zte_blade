@@ -49,3 +49,5 @@ applyPatch 0001-Use-RGB565-surface-for-wallpaper.patch frameworks_base framework
 applyPatch 0001-Prefer-16bpp-formats-for-opaque-bitmaps.patch frameworks_base frameworks/base
 applyPatch 0001-Prefer-16bpp-surface-formats.patch frameworks_base frameworks/base
 
+# FM radio
+applyPatch 0001-Legacy-FM-stream-support.patch frameworks_base frameworks/base

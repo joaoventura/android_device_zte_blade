@@ -1,0 +1,91 @@
+From 7f156788f6b912f124eb3f4d9520c15402fde13a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Wed, 13 Mar 2013 14:24:37 +0000
+Subject: [PATCH] Legacy FM stream support
+
+Change-Id: I085e00ca597694e5b38fbbbd445eb6ea82bf768a
+---
+ media/java/android/media/AudioManager.java |    5 ++++-
+ media/java/android/media/AudioService.java |    6 ++++--
+ media/java/android/media/AudioSystem.java  |    5 ++++-
+ 3 files changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/media/java/android/media/AudioManager.java b/media/java/android/media/AudioManager.java
+index 6c35a6e..1448695 100644
+--- a/media/java/android/media/AudioManager.java
++++ b/media/java/android/media/AudioManager.java
+@@ -168,6 +168,8 @@ public class AudioManager {
+     public static final int STREAM_DTMF = AudioSystem.STREAM_DTMF;
+     /** @hide The audio stream for text to speech (TTS) */
+     public static final int STREAM_TTS = AudioSystem.STREAM_TTS;
++    /** @hide The audio stream for legacy FM radio */
++    public static final int STREAM_FM = AudioSystem.STREAM_FM;
+     /** Number of audio streams */
+     /**
+      * @deprecated Use AudioSystem.getNumStreamTypes() instead
+@@ -186,7 +188,8 @@ public class AudioManager {
+         7,  // STREAM_BLUETOOTH_SCO
+         7,  // STREAM_SYSTEM_ENFORCED
+         11, // STREAM_DTMF
+-        11  // STREAM_TTS
++        11, // STREAM_TTS
++        11  // STREAM_FM
+     };
+ 
+     /**
+diff --git a/media/java/android/media/AudioService.java b/media/java/android/media/AudioService.java
+index 8cfed1b..0dc0794 100644
+--- a/media/java/android/media/AudioService.java
++++ b/media/java/android/media/AudioService.java
+@@ -189,7 +189,8 @@ public class AudioService extends IAudioService.Stub {
+         15, // STREAM_BLUETOOTH_SCO
+         7,  // STREAM_SYSTEM_ENFORCED
+         15, // STREAM_DTMF
+-        15  // STREAM_TTS
++        15, // STREAM_TTS
++        15  // STREAM_FM
+     };
+     /* STREAM_VOLUME_ALIAS[] indicates for each stream if it uses the volume settings
+      * of another stream: This avoids multiplying the volume settings for hidden
+@@ -205,7 +206,8 @@ public class AudioService extends IAudioService.Stub {
+         AudioSystem.STREAM_BLUETOOTH_SCO, // STREAM_BLUETOOTH_SCO
+         AudioSystem.STREAM_SYSTEM,  // STREAM_SYSTEM_ENFORCED
+         AudioSystem.STREAM_VOICE_CALL, // STREAM_DTMF
+-        AudioSystem.STREAM_MUSIC  // STREAM_TTS
++        AudioSystem.STREAM_MUSIC,  // STREAM_TTS
++        AudioSystem.STREAM_MUSIC   // STREAM_FM
+     };
+ 
+     private static final String[] STREAM_VOLUME_HEADSET_SETTINGS = new String[] {
+diff --git a/media/java/android/media/AudioSystem.java b/media/java/android/media/AudioSystem.java
+index 95d93b2..cbfa1ef 100644
+--- a/media/java/android/media/AudioSystem.java
++++ b/media/java/android/media/AudioSystem.java
+@@ -52,13 +52,15 @@ public class AudioSystem
+     public static final int STREAM_DTMF = 8;
+     /* @hide The audio stream for text to speech (TTS) */
+     public static final int STREAM_TTS = 9;
++    /* @hide The audio stream for FM radio */
++    public static final int STREAM_FM = 10;
+     /**
+      * @deprecated Use {@link #numStreamTypes() instead}
+      */
+     public static final int NUM_STREAMS = 5;
+ 
+     // Expose only the getter method publicly so we can change it in the future
+-    private static final int NUM_STREAM_TYPES = 10;
++    private static final int NUM_STREAM_TYPES = 11;
+     public static final int getNumStreamTypes() { return NUM_STREAM_TYPES; }
+ 
+     /*
+@@ -201,6 +203,7 @@ public class AudioSystem
+     public static final int DEVICE_OUT_AUX_DIGITAL = 0x400;
+     public static final int DEVICE_OUT_ANLG_DOCK_HEADSET = 0x800;
+     public static final int DEVICE_OUT_DGTL_DOCK_HEADSET = 0x1000;
++    public static final int DEVICE_OUT_FM = 0x2000;
+     public static final int DEVICE_OUT_DEFAULT = 0x8000;
+     // input devices
+     public static final int DEVICE_IN_COMMUNICATION = 0x10000;
+-- 
+1.7.10.4
+
