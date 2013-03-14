@@ -34,6 +34,11 @@ public:
         virtual ~AudioPolicyManager() {}
 
         virtual uint32_t getDeviceForStrategy(routing_strategy strategy, bool fromCache = true);
+        virtual status_t checkAndSetVolume(int stream, int index, audio_io_handle_t output, uint32_t device, int delayMs = 0, bool force = false);
+        virtual status_t setDeviceConnectionState(AudioSystem::audio_devices device,
+                                                  AudioSystem::device_connection_state state,
+                                                  const char *device_address);
+        virtual bool isStreamActive(int stream, uint32_t inPastMs) const;
 protected:
         // true is current platform implements a back microphone
         virtual bool hasBackMicrophone() const { return false; }

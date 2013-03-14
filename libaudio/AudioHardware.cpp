@@ -1240,8 +1240,9 @@ status_t AudioHardware::doAudioRouteOrMute(uint32_t device)
 
     mFmPrev=mFmRadioEnabled;
 #ifdef HAVE_FM_RADIO
-    if(mFmRadioEnabled && (device == SND_DEVICE_HEADSET)) {
+    if (mFmRadioEnabled) {
         mute = 0;
+        device = SND_DEVICE_HEADSET;
         LOGI("unmute for radio");
     }
 #endif
@@ -2159,9 +2160,10 @@ status_t AudioHardware::AudioStreamInMSM72xx::setParameters(const String8& keyVa
 status_t AudioHardware::setFmVolume(float v)
 {
     mFmVolume = (android::AudioSystem::logToLinear(v) +5) / 7;
-    if(mFmRadioEnabled) {
-    if (ioctl(fmfd, Si4708_IOC_SET_VOL, &mFmVolume) < 0) {
-        LOGE("set_volume_fm error.");
+    LOGI("setFmVolume v=%f mFmVolume=%d", v, mFmVolume);
+    if (mFmRadioEnabled) {
+        if (ioctl(fmfd, Si4708_IOC_SET_VOL, &mFmVolume) < 0) {
+            LOGE("set_volume_fm error.");
             return -EIO;
         }
     }

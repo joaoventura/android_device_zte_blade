@@ -26,8 +26,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := audio.primary.blade
 LOCAL_MODULE_TAGS := optional
-LOCAL_STATIC_LIBRARIES := libmedia_helper
-LOCAL_WHOLE_STATIC_LIBRARIES := libaudiohw_legacy
+LOCAL_STATIC_LIBRARIES := libmedia_helper libaudiohw_legacy
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
 
 LOCAL_SHARED_LIBRARIES := \
@@ -45,7 +44,10 @@ ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libdl
 endif
 
-LOCAL_SRC_FILES += AudioHardware.cpp
+LOCAL_SRC_FILES += \
+    AudioHardware.cpp \
+    audio_hw_hal.cpp
+
 LOCAL_CFLAGS += -fno-short-enums
 
 #ifeq ($(BOARD_HAVE_BLUETOOTH),true)
