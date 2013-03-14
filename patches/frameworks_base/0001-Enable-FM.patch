@@ -1,0 +1,394 @@
+From 989d989f0a5812f506c9bac343ded639fa87a624 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Thu, 14 Mar 2013 14:56:19 +0000
+Subject: [PATCH] Enable FM
+
+Change-Id: I6d93cf1b53642c55765c14a14f29192867fcd40b
+---
+ include/media/AudioSystem.h                  |    3 ++
+ include/media/IAudioFlinger.h                |    6 +++
+ media/libmedia/AudioSystem.cpp               |   13 ++++-
+ media/libmedia/IAudioFlinger.cpp             |   26 +++++++++-
+ services/audioflinger/AudioFlinger.cpp       |   24 ++++++++-
+ services/audioflinger/AudioFlinger.h         |    7 +++
+ services/audioflinger/AudioPolicyService.cpp |   67 ++++++++++++++++++++++++++
+ services/audioflinger/AudioPolicyService.h   |   20 +++++++-
+ 8 files changed, 159 insertions(+), 7 deletions(-)
+
+diff --git a/include/media/AudioSystem.h b/include/media/AudioSystem.h
+index 8982525..e43449d 100644
+--- a/include/media/AudioSystem.h
++++ b/include/media/AudioSystem.h
+@@ -96,6 +96,9 @@ public:
+         size_t* buffSize);
+ 
+     static status_t setVoiceVolume(float volume);
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++    static status_t setFmVolume(float volume);
++#endif
+ 
+     // return the number of audio frames written by AudioFlinger to audio HAL and
+     // audio dsp to DAC since the output on which the specified stream is playing
+diff --git a/include/media/IAudioFlinger.h b/include/media/IAudioFlinger.h
+index 743a0de..0e1b22c 100644
+--- a/include/media/IAudioFlinger.h
++++ b/include/media/IAudioFlinger.h
+@@ -1,5 +1,6 @@
+ /*
+  * Copyright (C) 2007 The Android Open Source Project
++ * Copyright (c) 2012, Code Aurora Forum. All rights reserved.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+@@ -203,6 +204,11 @@ public:
+ #ifdef STE_AUDIO
+     virtual size_t readInput(uint32_t *input, uint32_t inputClientId, void *buffer, uint32_t bytes, uint32_t *pOverwrittenBytes) = 0;
+ #endif
++
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++    virtual status_t setFmVolume(float volume) = 0;
++#endif
++
+ };
+ 
+ 
+diff --git a/media/libmedia/AudioSystem.cpp b/media/libmedia/AudioSystem.cpp
+index dc4ad4d..ee3be29 100644
+--- a/media/libmedia/AudioSystem.cpp
++++ b/media/libmedia/AudioSystem.cpp
+@@ -335,6 +335,15 @@ status_t AudioSystem::setVoiceVolume(float value)
+     return af->setVoiceVolume(value);
+ }
+ 
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++status_t AudioSystem::setFmVolume(float value)
++{
++    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
++    if (af == 0) return PERMISSION_DENIED;
++    return af->setFmVolume(value);
++}
++#endif
++
+ status_t AudioSystem::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int stream)
+ {
+     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
+@@ -879,7 +888,7 @@ extern "C" bool _ZN7android11AudioSystem20isBluetoothScoDeviceENS0_13audio_devic
+ 
+ extern "C" status_t _ZN7android11AudioSystem24setDeviceConnectionStateENS0_13audio_devicesENS0_23device_connection_stateEPKc(audio_devices_t device,
+                                                audio_policy_dev_state_t state,
+-                                               const char *device_address) 
++                                               const char *device_address)
+ {
+     return AudioSystem::setDeviceConnectionState(device, state, device_address);
+ }
+@@ -888,7 +897,7 @@ extern "C" audio_io_handle_t _ZN7android11AudioSystem9getOutputENS0_11stream_typ
+                                     uint32_t samplingRate,
+                                     uint32_t format,
+                                     uint32_t channels,
+-                                    audio_policy_output_flags_t flags) 
++                                    audio_policy_output_flags_t flags)
+ {
+    return AudioSystem::getOutput(stream,samplingRate,format,channels>>2,flags);
+ }
+diff --git a/media/libmedia/IAudioFlinger.cpp b/media/libmedia/IAudioFlinger.cpp
+index fd4c66c..1687f22 100644
+--- a/media/libmedia/IAudioFlinger.cpp
++++ b/media/libmedia/IAudioFlinger.cpp
+@@ -1,6 +1,7 @@
+ /*
+ **
+ ** Copyright 2007, The Android Open Source Project
++** Copyright (c) 2012, Code Aurora Forum. All rights reserved.
+ **
+ ** Licensed under the Apache License, Version 2.0 (the "License");
+ ** you may not use this file except in compliance with the License.
+@@ -89,10 +90,12 @@ enum {
+     READ_INPUT,
+ #endif
+ #ifdef WITH_QCOM_LPA
+-    SET_FM_VOLUME,
+     CREATE_SESSION,
+     DELETE_SESSION,
+-    APPLY_EFFECTS
++    APPLY_EFFECTS,
++#endif
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++    SET_FM_VOLUME
+ #endif
+ };
+ 
+@@ -861,6 +864,17 @@ public:
+         remote()->transact(MOVE_EFFECTS, data, &reply);
+         return reply.readInt32();
+     }
++
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++    virtual status_t setFmVolume(float volume)
++    {
++        Parcel data, reply;
++        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
++        data.writeFloat(volume);
++        remote()->transact(SET_FM_VOLUME, data, &reply);
++        return reply.readInt32();
++    }
++#endif
+ };
+ 
+ IMPLEMENT_META_INTERFACE(AudioFlinger, "android.media.IAudioFlinger");
+@@ -1325,6 +1339,14 @@ status_t BnAudioFlinger::onTransact(
+             return NO_ERROR;
+         } break;
+ #endif
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++        case SET_FM_VOLUME: {
++            CHECK_INTERFACE(IAudioFlinger, data, reply);
++            float volume = data.readFloat();
++            reply->writeInt32( setFmVolume(volume) );
++            return NO_ERROR;
++        } break;
++#endif
+         default:
+             return BBinder::onTransact(code, data, reply, flags);
+     }
+diff --git a/services/audioflinger/AudioFlinger.cpp b/services/audioflinger/AudioFlinger.cpp
+index 1c1c3a8..174a19e 100644
+--- a/services/audioflinger/AudioFlinger.cpp
++++ b/services/audioflinger/AudioFlinger.cpp
+@@ -1193,6 +1193,28 @@ status_t AudioFlinger::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrame
+     return BAD_VALUE;
+ }
+ 
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++status_t AudioFlinger::setFmVolume(float value)
++{
++    status_t ret = initCheck();
++    if (ret != NO_ERROR) {
++        return ret;
++    }
++
++    // check calling permissions
++    if (!settingsAllowed()) {
++        return PERMISSION_DENIED;
++    }
++
++    AutoMutex lock(mHardwareLock);
++    mHardwareStatus = AUDIO_SET_FM_VOLUME;
++    ret = mPrimaryHardwareDev->set_fm_volume(mPrimaryHardwareDev, value);
++    mHardwareStatus = AUDIO_HW_IDLE;
++
++    return ret;
++}
++#endif
++
+ void AudioFlinger::registerClient(const sp<IAudioFlingerClient>& client)
+ {
+ 
+@@ -5445,7 +5467,7 @@ int AudioFlinger::openSession(uint32_t *pDevices,
+     outHwDev = findSuitableHwDev_l(*pDevices);
+     if (outHwDev == NULL)
+         return 0;
+-	status = outHwDev->open_output_session(outHwDev, *pDevices, (int *)&format,sessionId,&outStream);
++    status = outHwDev->open_output_session(outHwDev, *pDevices, (int *)&format,sessionId,&outStream);
+ 
+     LOGV("openSession() openOutputSession returned output %p, Format %d, status %d",
+             outStream,
+diff --git a/services/audioflinger/AudioFlinger.h b/services/audioflinger/AudioFlinger.h
+index c278613..38f6f6b 100644
+--- a/services/audioflinger/AudioFlinger.h
++++ b/services/audioflinger/AudioFlinger.h
+@@ -219,6 +219,10 @@ public:
+ 
+     virtual status_t moveEffects(int sessionId, int srcOutput, int dstOutput);
+ 
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++    virtual status_t setFmVolume(float volume);
++#endif
++
+     enum hardware_call_state {
+         AUDIO_HW_IDLE = 0,
+         AUDIO_HW_INIT,
+@@ -236,6 +240,9 @@ public:
+         AUDIO_HW_SET_MIC_MUTE,
+         AUDIO_SET_VOICE_VOLUME,
+         AUDIO_SET_PARAMETER,
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++        AUDIO_SET_FM_VOLUME,
++#endif
+     };
+ 
+     // record interface
+diff --git a/services/audioflinger/AudioPolicyService.cpp b/services/audioflinger/AudioPolicyService.cpp
+index 37ca8fa..d902765 100644
+--- a/services/audioflinger/AudioPolicyService.cpp
++++ b/services/audioflinger/AudioPolicyService.cpp
+@@ -839,6 +839,18 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
+                     }
+                     delete data;
+                     }break;
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++                case SET_FM_VOLUME: {
++                    FmVolumeData *data = (FmVolumeData *)command->mParam;
++                    LOGV("AudioCommandThread() processing set fm volume volume %f", data->mVolume);
++                    command->mStatus = AudioSystem::setFmVolume(data->mVolume);
++                    if (command->mWaitStatus) {
++                        command->mCond.signal();
++                        mWaitWorkCV.wait(mLock);
++                    }
++                    delete data;
++                    }break;
++#endif
+                 default:
+                     LOGW("AudioCommandThread() unknown command %d", command->mCommand);
+                 }
+@@ -1010,6 +1022,35 @@ status_t AudioPolicyService::AudioCommandThread::voiceVolumeCommand(float volume
+     return status;
+ }
+ 
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++status_t AudioPolicyService::AudioCommandThread::fmVolumeCommand(float volume, int delayMs)
++{
++    status_t status = NO_ERROR;
++
++    AudioCommand *command = new AudioCommand();
++    command->mCommand = SET_FM_VOLUME;
++    FmVolumeData *data = new FmVolumeData();
++    data->mVolume = volume;
++    command->mParam = data;
++    if (delayMs == 0) {
++        command->mWaitStatus = true;
++    } else {
++        command->mWaitStatus = false;
++    }
++    Mutex::Autolock _l(mLock);
++    insertCommand_l(command, delayMs);
++    LOGV("AudioCommandThread() adding set fm volume volume %f", volume);
++    mWaitWorkCV.signal();
++    if (command->mWaitStatus) {
++        command->mCond.wait(mLock);
++        status =  command->mStatus;
++        mWaitWorkCV.signal();
++    }
++    return status;
++}
++#endif
++
++
+ // insertCommand_l() must be called with mLock held
+ void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *command, int delayMs)
+ {
+@@ -1072,6 +1113,13 @@ void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *comma
+                     data->mIO, data->mStream);
+             removedCommands.add(command2);
+         } break;
++
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++        case SET_FM_VOLUME: {
++            removedCommands.add(command2);
++        } break;
++#endif
++
+         case START_TONE:
+         case STOP_TONE:
+         default:
+@@ -1137,6 +1185,13 @@ int AudioPolicyService::setStreamVolume(audio_stream_type_t stream,
+                                                    (int)output, delayMs);
+ }
+ 
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++status_t AudioPolicyService::setFmVolume(float volume, int delayMs)
++{
++    return mAudioCommandThread->fmVolumeCommand(volume, delayMs);
++}
++#endif
++
+ int AudioPolicyService::startTone(audio_policy_tone_t tone,
+                                   audio_stream_type_t stream)
+ {
+@@ -1658,6 +1713,15 @@ static int aps_set_voice_volume(void *service, float volume, int delay_ms)
+     return audioPolicyService->setVoiceVolume(volume, delay_ms);
+ }
+ 
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++static int aps_set_fm_volume(void *service, float volume, int delay_ms)
++{
++    AudioPolicyService *audioPolicyService = (AudioPolicyService *)service;
++
++    return audioPolicyService->setFmVolume(volume, delay_ms);
++}
++#endif
++
+ }; // extern "C"
+ 
+ namespace {
+@@ -1681,6 +1745,9 @@ namespace {
+         stop_tone             : aps_stop_tone,
+         set_voice_volume      : aps_set_voice_volume,
+         move_effects          : aps_move_effects,
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++        set_fm_volume         : aps_set_fm_volume,
++#endif
+     };
+ }; // namespace <unnamed>
+ 
+diff --git a/services/audioflinger/AudioPolicyService.h b/services/audioflinger/AudioPolicyService.h
+index f9d7cac..98c9861 100644
+--- a/services/audioflinger/AudioPolicyService.h
++++ b/services/audioflinger/AudioPolicyService.h
+@@ -83,7 +83,7 @@ public:
+                                 int session = 0);
+     virtual void releaseOutput(audio_io_handle_t output);
+ #ifdef WITH_QCOM_LPA
+-	virtual status_t pauseSession(audio_io_handle_t output, audio_stream_type_t stream);
++    virtual status_t pauseSession(audio_io_handle_t output, audio_stream_type_t stream);
+     virtual status_t resumeSession(audio_io_handle_t output, audio_stream_type_t stream);
+     virtual status_t closeSession(audio_io_handle_t output);
+ #endif
+@@ -149,6 +149,9 @@ public:
+     virtual status_t startTone(audio_policy_tone_t tone, audio_stream_type_t stream);
+     virtual status_t stopTone();
+     virtual status_t setVoiceVolume(float volume, int delayMs = 0);
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++    virtual status_t setFmVolume(float volume, int delayMs = 0);
++#endif
+ 
+ private:
+                         AudioPolicyService();
+@@ -172,7 +175,10 @@ private:
+             STOP_TONE,
+             SET_VOLUME,
+             SET_PARAMETERS,
+-            SET_VOICE_VOLUME
++            SET_VOICE_VOLUME,
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++            SET_FM_VOLUME
++#endif
+         };
+ 
+         AudioCommandThread (String8 name);
+@@ -190,6 +196,9 @@ private:
+                     status_t    volumeCommand(int stream, float volume, int output, int delayMs = 0);
+                     status_t    parametersCommand(int ioHandle, const char *keyValuePairs, int delayMs = 0);
+                     status_t    voiceVolumeCommand(float volume, int delayMs = 0);
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++                    status_t    fmVolumeCommand(float volume, int delayMs = 0);
++#endif
+                     void        insertCommand_l(AudioCommand *command, int delayMs = 0);
+ 
+     private:
+@@ -234,6 +243,13 @@ private:
+             float mVolume;
+         };
+ 
++#if defined(QCOM_HARDWARE) && defined(HAVE_FM_RADIO)
++        class FmVolumeData {
++        public:
++            float mVolume;
++        };
++#endif
++
+         Mutex   mLock;
+         Condition mWaitWorkCV;
+         Vector <AudioCommand *> mAudioCommands; // list of pending commands
+-- 
+1.7.10.4
+

@@ -62,4 +62,5 @@ applyPatch 0001-Clean-STE_FM-AUDIO_SOURCE_FM-to-match-QCOM-FM-3-3.patch system_c
 applyPatch 0001-Clean-STE_FM-and-QCOM_HARDWARE.patch hardware_libhardware_legacy hardware/libhardware_legacy
 applyPatch 0001-Clean-STE_FM-and-QCOM_HARDWARE.patch system_core system/core
 
-
+# Enable FM in frameworks/base (so we can set volume)
+applyPatch 0001-Enable-FM.patch frameworks_base frameworks/base
