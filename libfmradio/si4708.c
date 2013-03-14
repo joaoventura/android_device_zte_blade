@@ -113,7 +113,7 @@ static int radioOn(struct si4708_session *priv)
 {
     int ret;
 
-    ALOGV("%s: enabling radio", __func__);
+    LOGV("%s: enabling radio", __func__);
 
     if (priv->radioEnabled) {
         return 0;
@@ -127,13 +127,13 @@ static int radioOn(struct si4708_session *priv)
     }
 
     if (ret != 0) {
-        ALOGE("%s: IOCTL Si4708_IOC_INIT2NORMAL failed %d", __func__, ret);
+        LOGE("%s: IOCTL Si4708_IOC_INIT2NORMAL failed %d", __func__, ret);
         return -1;
     }
 
     priv->radioEnabled = true;
 
-    ALOGD("FMRadio on");
+    LOGD("FMRadio on");
     return 0;
 }
 
@@ -141,17 +141,17 @@ static int radioOff(struct si4708_session *priv)
 {
     int ret;
 
-    ALOGD("%s: disabling radio radioEnabled=%i", __func__, priv->radioEnabled);
+    LOGD("%s: disabling radio radioEnabled=%i", __func__, priv->radioEnabled);
 
     ret = ioctl(priv->fd, Si4708_IOC_NORMAL2STANDBY);
 
     if (ret != 0) {
-        ALOGE("%s: IOCTL Si4708_IOC_NORMAL2STANDBY failed %d", __func__, ret);
+        LOGE("%s: IOCTL Si4708_IOC_NORMAL2STANDBY failed %d", __func__, ret);
         return -1;
     }
 
     priv->radioEnabled = false;
-    ALOGD("FMRadio off");
+    LOGD("FMRadio off");
 
     return 0;
 }
@@ -160,13 +160,13 @@ static int setFreq(struct si4708_session *priv, int freq)
 {
     int ret;
 
-    ALOGI("setFreq freq=%d", freq);
+    LOGI("setFreq freq=%d", freq);
 
     freq = freq / 10;
     ret = ioctl(priv->fd, Si4708_IOC_CHAN_SELECT, &freq);
 
     if (ret != 0) {
-        ALOGE("%s: IOCTL Si4708_IOC_CHAN_SELECT failed %d", __func__, ret);
+        LOGE("%s: IOCTL Si4708_IOC_CHAN_SELECT failed %d", __func__, ret);
         return -1;
     }
 
@@ -179,7 +179,7 @@ static int setFreqSpacing(struct si4708_session *priv, int spacing)
 {
     int nativeSpacing, ret;
 
-    ALOGI("setFreqSpacing spacing=%d", spacing);
+    LOGI("setFreqSpacing spacing=%d", spacing);
 
     switch (spacing) {
         case 200:
@@ -192,16 +192,16 @@ static int setFreqSpacing(struct si4708_session *priv, int spacing)
             nativeSpacing = CHAN_SPACING_50_kHz;
             break;
         default:
-            ALOGE("%s : ERROR invalid Freqency spacing %d", __func__, spacing);
+            LOGE("%s : ERROR invalid Freqency spacing %d", __func__, spacing);
             return -1;
     }
 
-    ALOGV("%s: spacing is %d", __func__, nativeSpacing);
+    LOGV("%s: spacing is %d", __func__, nativeSpacing);
 
     ret = ioctl(priv->fd, Si4708_IOC_CHAN_SPACING_SET, &nativeSpacing);
 
     if (ret != 0) {
-        ALOGE("%s: IOCTL Si4708_IOC_CHAN_SPACING_SET failed %d", __func__, ret);
+        LOGE("%s: IOCTL Si4708_IOC_CHAN_SPACING_SET failed %d", __func__, ret);
         return FMRADIO_IO_ERROR;
     }
 
@@ -212,12 +212,12 @@ static int setMute(struct si4708_session *priv, int mute)
 {
     int ret;
 
-    ALOGI("%s: setting mute %d", __func__, mute);
+    LOGI("%s: setting mute %d", __func__, mute);
 
     ret = ioctl(priv->fd, Si4708_IOC_MUTE, &mute);
 
     if (ret != 0) {
-        ALOGE("%s: IOCTL Si4708_IOC_MUTE failed %d", __func__, ret);
+        LOGE("%s: IOCTL Si4708_IOC_MUTE failed %d", __func__, ret);
         return FMRADIO_IO_ERROR;
     }
 
@@ -228,12 +228,12 @@ static int setDeemphasis(struct si4708_session *priv, int de)
 {
     int ret;
 
-    ALOGI("%s: setting TC %d", __func__, de);
+    LOGI("%s: setting TC %d", __func__, de);
 
     ret = ioctl(priv->fd, Si4708_IOC_DE_SET, &de);
 
     if (ret != 0) {
-        ALOGE("%s: IOCTL Si4708_IOC_DE_SET failed %d", __func__, ret);
+        LOGE("%s: IOCTL Si4708_IOC_DE_SET failed %d", __func__, ret);
         return FMRADIO_IO_ERROR;
     }
 
@@ -245,7 +245,7 @@ static int setBand(struct si4708_session *priv, int low, int high)
     int ret;
     int spacing, de, band;
 
-    ALOGI("%s", __func__);
+    LOGI("%s", __func__);
 
     if (low == 76000 && high == 90000) /* Japan */
         band = BAND_76000_90000_kHz;
@@ -255,7 +255,7 @@ static int setBand(struct si4708_session *priv, int low, int high)
     else
         band = BAND_76000_108000_kHz;
 
-    ALOGI("%s: Setting band %d", __func__, band);
+    LOGI("%s: Setting band %d", __func__, band);
 
     ret = ioctl(priv->fd, Si4708_IOC_BAND_SET, &band);
 
@@ -263,7 +263,7 @@ static int setBand(struct si4708_session *priv, int low, int high)
     setDeemphasis(priv, (low == 87900) ? FM_DE_TC_75 : FM_DE_TC_50);
 
     if (ret != 0) {
-        ALOGE("%s: IOCTL Si4708_IOC_BAND_SET failed %d", __func__, ret);
+        LOGE("%s: IOCTL Si4708_IOC_BAND_SET failed %d", __func__, ret);
         return FMRADIO_IO_ERROR;
     }
 
@@ -281,7 +281,7 @@ si4708_rx_start(void **session_data,
     struct si4708_session *priv;
     *session_data = priv = calloc(sizeof(struct si4708_session), 1);
 
-    ALOGI("rx_start low_freq=%d high_freq=%d default_freq=%d grid=%d",
+    LOGI("rx_start low_freq=%d high_freq=%d default_freq=%d grid=%d",
             low_freq, high_freq, default_freq, grid);
 
     priv->cb = callbacks;
@@ -302,7 +302,7 @@ si4708_pause(void **session_data)
 {
     struct si4708_session *priv = (struct si4708_session *)*session_data;
 
-    ALOGI("pause");
+    LOGI("pause");
 
     return setMute(priv, 1);
 }
@@ -312,7 +312,7 @@ si4708_resume(void **session_data)
 {
     struct si4708_session *priv = (struct si4708_session *)*session_data;
 
-    ALOGI("resume");
+    LOGI("resume");
 
     return setMute(priv, 0);
 }
@@ -322,7 +322,7 @@ si4708_set_frequency(void **session_data, int frequency)
 {
     struct si4708_session *priv = (struct si4708_session *)*session_data;
 
-    ALOGI("set_frequency frequency=%d", frequency);
+    LOGI("set_frequency frequency=%d", frequency);
 
     return setFreq(priv, frequency);
 }
@@ -332,7 +332,7 @@ si4708_get_frequency(void **session_data)
 {
     struct si4708_session *priv = (struct si4708_session *)*session_data;
 
-    ALOGI("get_frequency frequency=%d", priv->lastFreq);
+    LOGI("get_frequency frequency=%d", priv->lastFreq);
 
     return priv->lastFreq;
 }
@@ -344,7 +344,7 @@ si4708_scan(void **session_data, enum fmradio_seek_direction_t dir)
     int val[2];
     int retval;
 
-    ALOGI("scan %d", dir);
+    LOGI("scan %d", dir);
 
     if (dir == FMRADIO_SEEK_DOWN) {
         val[0] = SEEKDOWN;
@@ -355,11 +355,11 @@ si4708_scan(void **session_data, enum fmradio_seek_direction_t dir)
     }
 
     if (retval != 0) {
-        ALOGE("Search failed");
+        LOGE("Search failed");
         return priv->lastFreq;
     }
 
-    ALOGI("%s: freq=%d", __func__, val[1]);
+    LOGI("%s: freq=%d", __func__, val[1]);
     priv->lastFreq = val[1] * 10;
     priv->rds_reset = true;
     return priv->lastFreq;
@@ -371,14 +371,14 @@ si4708_set_force_mono(void **session_data, int force_mono)
     struct si4708_session *priv = (struct si4708_session *)*session_data;
     int ret;
 
-    ALOGI("%s: setting force mono %d", __func__, force_mono);
+    LOGI("%s: setting force mono %d", __func__, force_mono);
 
     if (force_mono == 0) {
         int stereo = 0;
         ret = ioctl(priv->fd, Si4708_IOC_SET_AUDIOTRACK, &stereo);
 
         if (ret != 0) {
-            ALOGE("%s: IOCTL Si4708_IOC_STEREO_SET failed %d", __func__, ret);
+            LOGE("%s: IOCTL Si4708_IOC_STEREO_SET failed %d", __func__, ret);
             return FMRADIO_IO_ERROR;
         }
     } else {
@@ -386,7 +386,7 @@ si4708_set_force_mono(void **session_data, int force_mono)
         ret = ioctl(priv->fd, Si4708_IOC_SET_AUDIOTRACK, &mono);
 
         if (ret != 0) {
-            ALOGE("%s: IOCTL Si4708_IOC_MONO_SET failed %d", __func__, ret);
+            LOGE("%s: IOCTL Si4708_IOC_MONO_SET failed %d", __func__, ret);
             return FMRADIO_IO_ERROR;
         }
     }
@@ -466,7 +466,7 @@ si4708_process_rds_data(struct si4708_session *priv, int rds_data[4])
     int type = (rds_data[1] & RDS_GROUP_TYPE_MASK) >> RDS_GROUP_TYPE_SHIFT;
     int version = (rds_data[1] & RDS_GROUP_VER_MASK) >> RDS_GROUP_VER_SHIFT;
 
-    //ALOGI("got RDS: %02x %02x %02x %02x", rds_data[0], rds_data[1],
+    //LOGI("got RDS: %02x %02x %02x %02x", rds_data[0], rds_data[1],
     //        rds_data[2], rds_data[3]);
 
     /* group type 0a/0b for PI, PTY and PSN */
@@ -520,7 +520,7 @@ si4708_process_rds_data(struct si4708_session *priv, int rds_data[4])
         return;
     }
 
-    //ALOGI("rds unknown group type %d%c", type, version ? 'b' : 'a');
+    //LOGI("rds unknown group type %d%c", type, version ? 'b' : 'a');
 }
 
 static void *
@@ -554,7 +554,7 @@ si4708_rds_thread_loop(void *arg)
             si4708_process_rds_data(priv, rds_data);
     }
 
-    ALOGI("%s: exiting", __func__);
+    LOGI("%s: exiting", __func__);
 
     return NULL;
 }
@@ -571,7 +571,7 @@ si4708_set_rds_reception(void **session_data, int use_rds)
 
         res = ioctl(priv->fd, Si4708_IOC_SET_RDS, &toggle);
         if (res < 0) {
-            ALOGI("Si4708_IOC_SET_RDS error: %d", res);
+            LOGI("Si4708_IOC_SET_RDS error: %d", res);
             return FMRADIO_IO_ERROR;
         }
 
@@ -590,7 +590,7 @@ si4708_set_rds_reception(void **session_data, int use_rds)
         }
 
         pthread_attr_destroy(&attr);
-        ALOGI("enabled RDS");
+        LOGI("enabled RDS");
         return FMRADIO_OK;
     } else if (!use_rds && priv->rds_thread) {
         int toggle = 0;
@@ -604,11 +604,11 @@ si4708_set_rds_reception(void **session_data, int use_rds)
 
         res = ioctl(priv->fd, Si4708_IOC_SET_RDS, &toggle);
         if (res < 0) {
-            ALOGI("Si4708_IOC_SET_RDS error: %d", res);
+            LOGI("Si4708_IOC_SET_RDS error: %d", res);
             return FMRADIO_IO_ERROR;
         }
 
-        ALOGI("disabled RDS");
+        LOGI("disabled RDS");
         return FMRADIO_OK;
     }
 
@@ -621,7 +621,7 @@ si4708_reset(void **session_data)
     struct si4708_session *priv = (struct si4708_session *)*session_data;
     int ret = 0;
 
-    ALOGI("reset");
+    LOGI("reset");
 
     if (priv) {
         ret |= si4708_set_rds_reception(session_data, 0);
