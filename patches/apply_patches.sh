@@ -64,3 +64,6 @@ applyPatch 0001-Clean-STE_FM-and-QCOM_HARDWARE.patch system_core system/core
 
 # Enable FM in frameworks/base (so we can set volume)
 applyPatch 0001-Enable-FM.patch frameworks_base frameworks/base
+
+# Allow subclass checkAndSetVolume
+applyPatch 0001-Allow-subclass-checkAndSetVolume.patch hardware_libhardware_legacy hardware/libhardware_legacy

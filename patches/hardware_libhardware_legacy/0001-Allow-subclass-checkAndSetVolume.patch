@@ -1,0 +1,26 @@
+From f245ae5964470e79f3db9bb4c6d1774006ee5344 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Thu, 14 Mar 2013 15:14:39 +0000
+Subject: [PATCH] Allow subclass checkAndSetVolume
+
+Change-Id: Ifc6ddfbcfe6a35f4e108a453e855af564d8a7f33
+---
+ include/hardware_legacy/AudioPolicyManagerBase.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/hardware_legacy/AudioPolicyManagerBase.h b/include/hardware_legacy/AudioPolicyManagerBase.h
+index 1f2158c..8139d08 100644
+--- a/include/hardware_legacy/AudioPolicyManagerBase.h
++++ b/include/hardware_legacy/AudioPolicyManagerBase.h
+@@ -278,7 +278,7 @@ protected:
+         // device
+         virtual float computeVolume(int stream, int index, audio_io_handle_t output, uint32_t device);
+         // check that volume change is permitted, compute and send new volume to audio hardware
+-#ifdef WITH_QCOM_LPA
++#ifdef QCOM_HARDWARE
+         virtual status_t checkAndSetVolume(int stream, int index, audio_io_handle_t output, uint32_t device, int delayMs = 0, bool force = false);
+ #else
+         status_t checkAndSetVolume(int stream, int index, audio_io_handle_t output, uint32_t device, int delayMs = 0, bool force = false);
+-- 
+1.7.10.4
+
