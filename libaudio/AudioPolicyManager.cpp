@@ -359,11 +359,16 @@ status_t AudioPolicyManager::setDeviceConnectionState(AudioSystem::audio_devices
 
 #ifdef HAVE_FM_RADIO
         if (device == AudioSystem::DEVICE_OUT_FM) {
+            AudioOutputDescriptor *out = mOutputs.valueFor(mHardwareOutput);
             if (state == AudioSystem::DEVICE_STATE_AVAILABLE) {
-                mOutputs.valueFor(mHardwareOutput)->changeRefCount(AudioSystem::FM, 1);
+                out->changeRefCount(AudioSystem::FM, 1);
+                if (out->refCount() > 0)
+                    mpClientInterface->setParameters(0, String8("fm_on=1"));
             }
             else {
-                mOutputs.valueFor(mHardwareOutput)->changeRefCount(AudioSystem::FM, -1);
+                out->changeRefCount(AudioSystem::FM, -1);
+                if (out->refCount() <= 0)
+                    mpClientInterface->setParameters(0, String8("fm_off=1"));
             }
         }
 #endif
