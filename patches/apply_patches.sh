@@ -67,3 +67,6 @@ applyPatch 0001-Enable-FM.patch frameworks_base frameworks/base
 
 # Allow subclass checkAndSetVolume
 applyPatch 0001-Allow-subclass-checkAndSetVolume.patch hardware_libhardware_legacy hardware/libhardware_legacy
+
+# Default transitions time
+applyPatch 0001-Set-default-animations-and-transitions-to-0.5.patch frameworks_base frameworks/base
