@@ -71,6 +71,10 @@ PRODUCT_PACKAGES += \
         libfmradio.si4708 \
         Effem
 
+# Eco Wallpapers
+PRODUCT_PACKAGES += \
+        EcoWallpapers
+
 # Other
 PRODUCT_PACKAGES += \
         dexpreopt
@@ -121,6 +125,11 @@ PRODUCT_COPY_FILES += \
 # FM Radio
 PRODUCT_COPY_FILES += \
         frameworks/base/data/etc/com.stericsson.hardware.fm.receiver.xml:system/etc/permissions/com.stericsson.hardware.fm.receiver.xml
+
+# CMFilemanager
+PRODUCT_COPY_FILES += \
+        device/zte/blade/prebuilt/system/app/CMFileManager.apk:system/app/CMFileManager.apk \
+        device/zte/blade/prebuilt/system/app/CMFileManagerThemes.apk:system/app/CMFileManagerThemes.apk
 
 # These are the hardware-specific features
 PRODUCT_COPY_FILES += \
