@@ -103,7 +103,8 @@ PRODUCT_COPY_FILES := \
         device/zte/blade/prebuilt/system/etc/start_usb0.sh:system/etc/start_usb0.sh \
         device/zte/blade/prebuilt/system/etc/vold.fstab:system/etc/vold.fstab \
         device/zte/blade/prebuilt/system/usr/keylayout/blade_keypad.kl:/system/usr/keylayout/blade_keypad.kl \
-        device/zte/blade/releasetools/extras.sh:system/bin/extras.sh
+        device/zte/blade/releasetools/extras.sh:system/bin/extras.sh \
+        device/zte/blade/prebuilt/system/etc/init.d/999youtube:system/etc/init.d/999youtube
 
 # Bluetooth configuration files
 PRODUCT_COPY_FILES += \
