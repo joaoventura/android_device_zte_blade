@@ -70,3 +70,6 @@ applyPatch 0001-Allow-subclass-checkAndSetVolume.patch hardware_libhardware_lega
 
 # Default transitions time
 applyPatch 0001-Set-default-animations-and-transitions-to-0.5.patch frameworks_base frameworks/base
+
+# Sd-ext
+applyPatch 0001-Add-sd-ext-directory.patch system_core system/core
