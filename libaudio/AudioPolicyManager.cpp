@@ -362,12 +362,12 @@ status_t AudioPolicyManager::setDeviceConnectionState(AudioSystem::audio_devices
             AudioOutputDescriptor *out = mOutputs.valueFor(mHardwareOutput);
             if (state == AudioSystem::DEVICE_STATE_AVAILABLE) {
                 out->changeRefCount(AudioSystem::FM, 1);
-                if (out->refCount() > 0)
+                if (out->mRefCount[AudioSystem::FM] > 0)
                     mpClientInterface->setParameters(0, String8("fm_on=1"));
             }
             else {
                 out->changeRefCount(AudioSystem::FM, -1);
-                if (out->refCount() <= 0)
+                if (out->mRefCount[AudioSystem::FM] <= 0)
                     mpClientInterface->setParameters(0, String8("fm_off=1"));
             }
         }
