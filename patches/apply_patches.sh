@@ -73,3 +73,6 @@ applyPatch 0001-Set-default-animations-and-transitions-to-0.5.patch frameworks_b
 
 # Sd-ext
 applyPatch 0001-Add-sd-ext-directory.patch system_core system/core
+
+# Wpa-supplicant_6 ADHoc patch
+applyPatch 0001-Hack-for-ad-hoc-networks.patch external_wpa_supplicant_6 external/wpa_supplicant_6
