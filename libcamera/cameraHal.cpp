@@ -39,9 +39,37 @@
 
 //#define LOGV LOGI
 
+struct qcom_mdp_rect {
+    uint32_t x;
+    uint32_t y;
+    uint32_t w;
+    uint32_t h;
+};
+
+struct qcom_mdp_img {
+    uint32_t width;
+    int32_t  height;
+    int32_t  format;
+    int32_t  offset;
+    int      memory_id; /* The file descriptor */
+    uint32_t priv; // CONFIG_ANDROID_PMEM
+};
+
+struct qcom_mdp_blit_req {
+    struct   qcom_mdp_img src;
+    struct   qcom_mdp_img dst;
+    struct   qcom_mdp_rect src_rect;
+    struct   qcom_mdp_rect dst_rect;
+    uint32_t alpha;
+    uint32_t transp_mask;
+    uint32_t flags;
+    int sharpening_strength;  /* -127 <--> 127, default 64 */
+};
+
+
 struct blitreq {
-   unsigned int count;
-   struct mdp_blit_req req;
+    unsigned int count;
+    struct qcom_mdp_blit_req req;
 };
 
 /* Prototypes and extern functions. */
@@ -125,6 +153,7 @@ CameraHAL_CopyBuffers_Hw(int srcFd, int destFd,
     blit.req.flags       = 0;
     blit.req.alpha       = 0xff;
     blit.req.transp_mask = 0xffffffff;
+    blit.req.sharpening_strength = 64;  /* -127 <--> 127, default 64 */
 
     blit.req.src.width     = w;
     blit.req.src.height    = h;
@@ -332,7 +361,9 @@ CameraHAL_DataCb(int32_t msg_type, const android::sp<android::IMemory>& dataPtr,
       hwParameters.getPreviewSize(&previewWidth, &previewHeight);
       CameraHAL_HandlePreviewData(dataPtr, mWindow, origCamReqMemory,
                                   previewWidth, previewHeight);
-   } else if (origData_cb != NULL && origCamReqMemory != NULL) {
+   }
+
+   if (origData_cb != NULL && origCamReqMemory != NULL) {
       camera_memory_t *clientData = CameraHAL_GenClientData(dataPtr,
                                        origCamReqMemory, user);
       if (clientData != NULL) {
@@ -602,7 +633,7 @@ void
 qcamera_release_recording_frame(struct camera_device * device,
                                 const void *opaque)
 {
-   /* 
+   /*
     * We release the frame immediately in CameraHAL_DataTSCb after making a
     * copy. So, this is just a NOP.
     */
@@ -682,7 +713,7 @@ qcamera_put_parameters(struct camera_device *device, char *params)
 
 
 int
-qcamera_send_command(struct camera_device * device, int32_t cmd, 
+qcamera_send_command(struct camera_device * device, int32_t cmd,
                         int32_t arg0, int32_t arg1)
 {
    LOGV("qcamera_send_command: cmd:%d arg0:%d arg1:%d\n",
