@@ -43,3 +43,6 @@ applyPatch 0001-Set-default-call-ui-to-slider.patch packages_apps_Phone packages
 # Apply patches on vendor/cyanogen
 applyPatch 0001-Add-chess-default-wallpaper.patch vendor_cyanogen vendor/cyanogen
 
+# Apply patches on Settings
+applyPatch 0001-Power-Control-Widget-Receive-Location-Provider-inten.patch packages_apps_Settings packages/apps/Settings
+

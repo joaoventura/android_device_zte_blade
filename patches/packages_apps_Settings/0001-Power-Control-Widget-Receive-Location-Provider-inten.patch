@@ -1,0 +1,38 @@
+From 9106ca680f89578881132c1e63060e2344ec61be Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jo=C3=A3o=20Ventura?= <joaojonesventura@gmail.com>
+Date: Wed, 22 May 2013 23:06:22 +0100
+Subject: [PATCH] Power Control Widget: Receive Location Provider intent
+
+This allows to toggle on/off the GPS button in the power control widget on the
+launcher area when the GPS is changed in the notification drawer power widget.
+
+Change-Id: I8a05d37e88843f22256b3f7d263a01cc5a2e9501
+---
+ src/com/android/settings/widget/SettingsAppWidgetProvider.java | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/com/android/settings/widget/SettingsAppWidgetProvider.java b/src/com/android/settings/widget/SettingsAppWidgetProvider.java
+index 01c5ec0..fdb73f8 100644
+--- a/src/com/android/settings/widget/SettingsAppWidgetProvider.java
++++ b/src/com/android/settings/widget/SettingsAppWidgetProvider.java
+@@ -45,6 +45,7 @@ import android.content.Intent;
+ import android.content.SharedPreferences;
+ import android.content.SharedPreferences.Editor;
+ import android.content.pm.PackageManager;
++import android.location.LocationManager;
+ import android.net.Uri;
+ import android.net.wifi.WifiManager;
+ import android.net.wimax.WimaxManagerConstants;
+@@ -375,6 +376,9 @@ public class SettingsAppWidgetProvider extends AppWidgetProvider {
+         } else if (MobileDataButton.MOBILE_DATA_CHANGED.equals(intent.getAction())) {
+             logD("Received mobile data mode state change");
+             MobileDataButton.getInstance().onReceive(context, intent);
++        } else if (LocationManager.PROVIDERS_CHANGED_ACTION.equals(intent.getAction())) {
++            logD("Received location provider state change");
++            GPSButton.getInstance().updateState(context, null, null);
+         } else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())
+                 || SecuritySettings.GPS_STATUS_CHANGED.equals(intent.getAction())) {
+         } else {
+-- 
+1.8.1.2
+
